@@ -17,11 +17,14 @@ from archive.models import supply_elec_gas,food,drug,chemical
 from archive.models import contracting,wholesale,retail,tile
 from archive.models import cement,non_metal,hotel,investments
 
-#33-47
+#33-48
 from archive.models import banks,other_financial,transportation,water_transportation
 from archive.models import financial,insurance,auxiliary,etf
 from archive.models import financing_bonds,estate,engineering,app_computer
-from archive.models import information,technical_services,artistic
+from archive.models import information,technical_services,artistic,tanning
+
+#49
+from archive.models import telecommunication
 
 
 def daily(request,group): 
@@ -132,17 +135,23 @@ def daily(request,group):
     elif(group == 'estate'):    
         data = Archive.objects.filter(group="انبوه سازی، املاک، مستغلات")
     elif(group == 'engineering'):    
-        data = Archive.objects.filter(group="فعالیت های مهندسی، تجزیه، تحلیل و آزمایش فنی ")
+        data = Archive.objects.filter(group="فعالیت های مهندسی، تجزیه، تحلیل و آزمایش فنی")
     elif(group == 'app_computer'):    
         data = Archive.objects.filter(group="رایانه و فعالیت های وابسته به آن")
 
-    #45-47
+    #45-48
     elif(group == 'information'):    
         data = Archive.objects.filter(group="اطلاعات و ارتباطات")
     elif(group == 'technical_services'):    
         data = Archive.objects.filter(group="خدمات فنی و مهندسی")
     elif(group == 'artistic'):    
         data = Archive.objects.filter(group="فعالیت های هنری، سرگرمی و خلاقانه")
+    elif(group == 'tanning'):    
+        data = Archive.objects.filter(group="دباغی، پرداخت چرم و ساخت انواع پاپوش")
+    
+    #49
+    elif(group == 'telecommunication'):    
+        data = Archive.objects.filter(group="مخابرات")
     
 
     for address in data:
@@ -256,14 +265,19 @@ def daily(request,group):
         elif(group == 'app_computer'):    
             has = app_computer.objects.filter(name=address.name,date=datetime.date.today())
 
-        #45-47
+        #45-48
         elif(group == 'information'):    
             has = information.objects.filter(name=address.name,date=datetime.date.today())
         elif(group == 'technical_services'):    
             has = technical_services.objects.filter(name=address.name,date=datetime.date.today())
         elif(group == 'artistic'):    
             has = artistic.objects.filter(name=address.name,date=datetime.date.today())
+        elif(group == 'tanning'):    
+            has = tanning.objects.filter(name=address.name,date=datetime.date.today())
 
+        #49
+        elif(group == 'telecommunication'):    
+            has = telecommunication.objects.filter(name=address.name,date=datetime.date.today())
 
         if(len(has) == 0):
             url = address.url
@@ -314,7 +328,38 @@ def daily(request,group):
                         my_obj['data'].append({"csc":arr[9]}) 
                                     
             else:
-                my_obj=['Stopped stock']
+                in_api = re.compile("IS.*")
+                data_inapi = in_api.findall(plain_api)
+                if(len(str(data_inapi)) > 5):
+                    
+                    for data in data_inapi :
+                        arr = data.split(',')
+                        if(int(arr[7]) > 0):
+                            my_obj['data'].append({"pi":arr[1]}) 
+                            my_obj['data'].append({"pe":arr[2]}) 
+                            my_obj['data'].append({"ct":arr[7]}) 
+                            my_obj['data'].append({"vt":arr[8]}) 
+                            my_obj['data'].append({"value_t":arr[9]}) 
+
+                    for data in data_inapi :
+                        arr = data.split(';')
+                        arr = arr[4]
+                        if(len(str(arr)) > 5): 
+                            arr = arr.split(',')
+                            my_obj['data'].append({"vbs":arr[0]}) 
+                            my_obj['data'].append({"vbc":arr[1]}) 
+                            my_obj['data'].append({"vss":arr[3]}) 
+                            my_obj['data'].append({"vsc":arr[4]}) 
+
+                            my_obj['data'].append({"cbs":arr[5]}) 
+                            my_obj['data'].append({"cbc":arr[6]}) 
+                            my_obj['data'].append({"css":arr[8]}) 
+                            my_obj['data'].append({"csc":arr[9]}) 
+                        
+                        else:
+                            my_obj=['Stopped stock']
+                else:
+                    my_obj=['IS AND A NOT EXIST !!']
 
             #1-4
             if(group == 'agriculture'):    
@@ -427,10 +472,18 @@ def daily(request,group):
             elif(group == 'app_computer'):
                 app_computer.objects.create(name=address.name,kind=address.kind,date=datetime.date.today(),data=my_obj)
 
-             #45-47
+             #45-48
             elif(group == 'information'):
                 information.objects.create(name=address.name,kind=address.kind,date=datetime.date.today(),data=my_obj)
             elif(group == 'technical_services'):
                 technical_services.objects.create(name=address.name,kind=address.kind,date=datetime.date.today(),data=my_obj)
             elif(group == 'artistic'):
                 artistic.objects.create(name=address.name,kind=address.kind,date=datetime.date.today(),data=my_obj)
+            elif(group == 'tanning'):
+                tanning.objects.create(name=address.name,kind=address.kind,date=datetime.date.today(),data=my_obj)
+
+            #49
+            elif(group == 'telecommunication'):
+                telecommunication.objects.create(name=address.name,kind=address.kind,date=datetime.date.today(),data=my_obj)
+
+    return HttpResponse(group)

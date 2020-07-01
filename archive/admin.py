@@ -9,12 +9,14 @@ from .models import comm_devices,cars,sugar,multidisciplinary
 from .models import supply_elec_gas,food,drug,chemical
 from .models import contracting,wholesale,retail,tile
 from .models import cement,non_metal,hotel,investments
-#33-47
+#33-48
 from .models import banks,other_financial,transportation,water_transportation
 from .models import financial,insurance,auxiliary,etf
 from .models import financing_bonds,estate,engineering,app_computer
-from .models import information,technical_services,artistic
+from .models import information,technical_services,artistic,tanning
 
+#49
+from .models import telecommunication
 
 admin.site.register(Archive)
 
@@ -88,3 +90,7 @@ admin.site.register(app_computer)
 admin.site.register(information)
 admin.site.register(technical_services)
 admin.site.register(artistic)
+admin.site.register(tanning)
+
+#49
+admin.site.register(telecommunication)

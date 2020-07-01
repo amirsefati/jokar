@@ -285,7 +285,7 @@ class app_computer(models.Model):
     date  = models.DateField(default=datetime.date.today)
     data  = models.TextField()    
 
-#45-47
+#45-48
 class information(models.Model):
     name  = models.CharField(max_length=100)
     kind  = models.CharField(max_length=100)
@@ -299,6 +299,19 @@ class technical_services(models.Model):
     data  = models.TextField()    
 
 class artistic(models.Model):
+    name  = models.CharField(max_length=100)
+    kind  = models.CharField(max_length=100)
+    date  = models.DateField(default=datetime.date.today)
+    data  = models.TextField()    
+
+class tanning(models.Model):
+    name  = models.CharField(max_length=100)
+    kind  = models.CharField(max_length=100)
+    date  = models.DateField(default=datetime.date.today)
+    data  = models.TextField()    
+
+#49
+class telecommunication(models.Model):
     name  = models.CharField(max_length=100)
     kind  = models.CharField(max_length=100)
     date  = models.DateField(default=datetime.date.today)
