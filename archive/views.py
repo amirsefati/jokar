@@ -309,7 +309,11 @@ def daily(request,group):
                     my_obj['data'].append({"ct":arr[7]}) 
                     my_obj['data'].append({"vt":arr[8]}) 
                     my_obj['data'].append({"value_t":arr[9]}) 
-                
+                    if(group == 'etf'):
+                        my_obj['data'].append({"da":arr[13]})
+                        nav = arr[14].split(';') 
+                        my_obj['data'].append({"nav":nav[0]}) 
+
                 for data in data_inapi :
                     arr = data.split(';')
                     arr = arr[4]
