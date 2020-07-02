@@ -345,21 +345,20 @@ def daily(request,group):
                             my_obj['data'].append({"vt":arr[8]}) 
                             my_obj['data'].append({"value_t":arr[9]}) 
 
-                    for data in data_inapi :
-                        arr = data.split(';')
-                        arr = arr[4]
-                        if(len(str(arr)) > 5): 
-                            arr = arr.split(',')
-                            my_obj['data'].append({"vbs":arr[0]}) 
-                            my_obj['data'].append({"vbc":arr[1]}) 
-                            my_obj['data'].append({"vss":arr[3]}) 
-                            my_obj['data'].append({"vsc":arr[4]}) 
+                            for data in data_inapi :
+                                arr = data.split(';')
+                                arr = arr[4]
+                                arr = arr.split(',')
+                                my_obj['data'].append({"vbs":arr[0]}) 
+                                my_obj['data'].append({"vbc":arr[1]}) 
+                                my_obj['data'].append({"vss":arr[3]}) 
+                                my_obj['data'].append({"vsc":arr[4]}) 
 
-                            my_obj['data'].append({"cbs":arr[5]}) 
-                            my_obj['data'].append({"cbc":arr[6]}) 
-                            my_obj['data'].append({"css":arr[8]}) 
-                            my_obj['data'].append({"csc":arr[9]}) 
-                        
+                                my_obj['data'].append({"cbs":arr[5]}) 
+                                my_obj['data'].append({"cbc":arr[6]}) 
+                                my_obj['data'].append({"css":arr[8]}) 
+                                my_obj['data'].append({"csc":arr[9]}) 
+                            
                         else:
                             my_obj=['Stopped stock']
                 else:
