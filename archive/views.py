@@ -28,6 +28,11 @@ from archive.models import information,technical_services,artistic,tanning
 #49
 from archive.models import telecommunication
 
+
+def delete(request,group):
+    apps.get_model('archive',group).objects.all().delete()
+
+
 def datarange(start_date,end_date):
     for n in range((end_date - start_date).days):
         yield start_date + timedelta(n)
