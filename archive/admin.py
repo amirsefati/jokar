@@ -1,6 +1,10 @@
 from django.contrib import admin
+
+
+from .models import Archive,namadtomodel
+
 #1-16
-from .models import Archive,agriculture,coal,oil_gas,metal_ores
+from .models import agriculture,coal,oil_gas,metal_ores
 from .models import other_mines,textiles,wood,paper
 from .models import printz,pet_products,plastic,elec_computer
 from .models import basic_metal,metal_products,equipment,electrical
@@ -18,7 +22,12 @@ from .models import information,technical_services,artistic,tanning
 #49
 from .models import telecommunication
 
+
+
 admin.site.register(Archive)
+
+admin.site.register(namadtomodel)
+
 
 #1-4
 admin.site.register(agriculture)

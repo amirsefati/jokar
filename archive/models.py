@@ -10,6 +10,10 @@ class Archive(models.Model):
     api   = models.CharField(max_length=250)
     history = models.CharField(max_length=250)
 
+class namadtomodel(models.Model):
+    namad = models.CharField(max_length=250)
+    model = models.CharField(max_length=100)
+
 #1-4
 class agriculture(models.Model):
     name  = models.CharField(max_length=100)
