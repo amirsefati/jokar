@@ -29,6 +29,27 @@ from archive.models import information,technical_services,artistic,tanning
 from archive.models import telecommunication
 
 
+def daily_check(request):
+    datain_archive = Archive.objects.all()
+    all_namad = {'name':[]}
+    for data in datain_archive:
+        all_namad['name'].append({data.name})
+
+    today_list = {'name':[]}
+    has = ['agriculture','coal','oil_gas','metal_ores','other_mines','textiles','wood','paper','printz','pet_products','plastic','elec_computer','basic_metal','metal_products','equipment','electrical','comm_devices','cars','sugar','multidisciplinary','supply_elec_gas','food','drug','chemical','contracting','wholesale','retail','tile','cement','non_metal','hotel','investments','banks','other_financial','transportation','water_transportation','financial','insurance','auxiliary','etf','financing_bonds','estate','engineering','app_computer','information','technical_services','artistic']    
+    for item in has:
+        today = apps.get_model('archive',item).objects.filter(date=datetime.date.today())
+
+        for today_namad in today:
+            today_list['name'].append({today_namad.name})
+
+    diff = []
+    for arch in all_namad['name']:
+        if arch not in today_list['name']:
+            diff.append(arch)
+
+    return HttpResponse(diff)
+
 def delete(request,group):
     apps.get_model('archive',group).objects.all().delete()
 
@@ -41,81 +62,78 @@ start_date = ''
 end_date = ''
 
 def history(request,group,start_time,end_time,name):
+    has = ['agriculture','coal','oil_gas','metal_ores','other_mines','textiles','wood','paper','printz','pet_products','plastic','elec_computer','basic_metal','metal_products','equipment','electrical','comm_devices','cars','sugar','multidisciplinary','supply_elec_gas','food','drug','chemical','contracting','wholesale','retail','tile','cement','non_metal','hotel','investments','banks','other_financial','transportation','water_transportation','financial','insurance','auxiliary','etf','financing_bonds','estate','engineering','app_computer','information','technical_services','artistic']
+    if(group in has):
 
-    start_time = start_time.split(',')
-    end_time = end_time.split(',')
-    start_date = date(int(start_time[0]),int(start_time[1]),int(start_time[2]))
-    end_date = date(int(end_time[0]),int(end_time[1]),int(end_time[2]))
+        start_time = start_time.split(',')
+        end_time = end_time.split(',')
+        start_date = date(int(start_time[0]),int(start_time[1]),int(start_time[2]))
+        end_date = date(int(end_time[0]),int(end_time[1]),int(end_time[2]))
 
-    check = Archive.objects.filter(name=name)
-    url = check[0].history
-    
-    #model = apps.get_model('archive', group)
-
-    for single_date in datarange(start_date,end_date):  
-        amir= single_date.strftime("%Y%m%d")
-        url = "{}{}".format(url,amir)
+        check = Archive.objects.filter(name=name)
+        url = check[0].history
         
-        response = requests.get(url)
-        data = response.text
+        #model = apps.get_model('archive', group)
 
-        hiderow = re.compile("var\s+ClosingPriceData=(.*)")
-        hidden = hiderow.findall(data)
-
-        mamad = 2
-        for char in hidden :
-            for char2 in char : 
-                mamad +=1 
-        
-        my_obj = {'data':[]}
-
-        if(mamad > 50):   
+        for single_date in datarange(start_date,end_date): 
             
-            #Get End Price
-            end = re.compile("var\s+ClosingPriceData=(.*)")
-            endprice = end.findall(data)
+            amir= single_date.strftime("%Y%m%d")
+            url = "{}{}".format(url,amir)
+            
+            response = requests.get(url)
+            data = response.text
 
-            for item in endprice :
-                item5 = item.replace('[[','[')
-                item6 = item5.replace(']]',']')
-                item7 = item6.split('],[')
-                item8 = item7[-1]
-                item9 = item8.replace("'","")
-                item10 = item9.split(',')
-                my_obj['data'].append({'pi' : item10[2]}) 
-                my_obj['data'].append({'pe' : item10[3]}) 
-                my_obj['data'].append({'ct' : item10[8]}) 
-                my_obj['data'].append({'vt' : item10[9]}) 
-                my_obj['data'].append({'value_t' : item10[10]}) 
+            hiderow = re.compile("var\s+ClosingPriceData=(.*)")
+            hidden = hiderow.findall(data)
 
-            p = re.compile("var\s+ClientTypeData=(.*)")
-            b = p.findall(data) 
-            for item in b :
-                item2 = item.split(',')
-                my_obj['data'].append({'vbs' : item2[4]}) 
-                my_obj['data'].append({'vbc' : item2[5]}) 
-                my_obj['data'].append({'vss' : item2[6]}) 
-                my_obj['data'].append({'vsc' : item2[7]}) 
-                my_obj['data'].append({'cbs' : item2[0]}) 
-                my_obj['data'].append({'cbc' : item2[1]}) 
-                my_obj['data'].append({'css' : item2[2]}) 
-                my_obj['data'].append({'csc' : item2[3]}) 
-                apps.get_model('archive',group).objects.create(name=name,kind=check[0].kind,date=single_date.strftime("%Y-%m-%d"),data=my_obj)
+            mamad = 2
+            for char in hidden :
+                for char2 in char : 
+                    mamad +=1 
+            
+            my_obj = {'data':[]}
 
-        else:
-            my_obj=['Stopped stock']
-        
+            if(mamad > 50):   
+                
+                #Get End Price
+                end = re.compile("var\s+ClosingPriceData=(.*)")
+                endprice = end.findall(data)
 
+                for item in endprice :
+                    item5 = item.replace('[[','[')
+                    item6 = item5.replace(']]',']')
+                    item7 = item6.split('],[')
+                    item8 = item7[-1]
+                    item9 = item8.replace("'","")
+                    item10 = item9.split(',')
+                    my_obj['data'].append({'pi' : item10[2]}) 
+                    my_obj['data'].append({'pe' : item10[3]}) 
+                    my_obj['data'].append({'ct' : item10[8]}) 
+                    my_obj['data'].append({'vt' : item10[9]}) 
+                    my_obj['data'].append({'value_t' : item10[10]}) 
 
+                p = re.compile("var\s+ClientTypeData=(.*)")
+                b = p.findall(data) 
+                for item in b :
+                    item2 = item.split(',')
+                    my_obj['data'].append({'vbs' : item2[4]}) 
+                    my_obj['data'].append({'vbc' : item2[5]}) 
+                    my_obj['data'].append({'vss' : item2[6]}) 
+                    my_obj['data'].append({'vsc' : item2[7]}) 
+                    my_obj['data'].append({'cbs' : item2[0]}) 
+                    my_obj['data'].append({'cbc' : item2[1]}) 
+                    my_obj['data'].append({'css' : item2[2]}) 
+                    my_obj['data'].append({'csc' : item2[3]}) 
+                    apps.get_model('archive',group).objects.create(name=name,kind=check[0].kind,date=single_date.strftime("%Y-%m-%d"),data=my_obj)
 
-
-
-
+            else:
+                my_obj=['Stopped stock']
+    else:
+        return HttpResponse('نام گروه رو بد وارد کردی')        
 
 
 
 def daily(request,group): 
-
 
     #1-4
     if(group == 'agriculture'):    
