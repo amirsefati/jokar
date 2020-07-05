@@ -8,7 +8,8 @@ from django.apps import apps
 from datetime import timedelta,date
 
 #4-16
-from archive.models import Archive,agriculture,coal,oil_gas,metal_ores
+from archive.models import Archive,namadtomodel
+from archive.models import agriculture,coal,oil_gas,metal_ores
 from archive.models import other_mines,textiles,wood,paper
 from archive.models import printz,pet_products,plastic,elec_computer
 from archive.models import basic_metal,metal_products,equipment,electrical
@@ -28,17 +29,119 @@ from archive.models import information,technical_services,artistic,tanning
 #49
 from archive.models import telecommunication
 
+
 def incomp(request):
     incom = {'name':[]}
     has = ['agriculture','coal','oil_gas','metal_ores','other_mines','textiles','wood','paper','printz','pet_products','plastic','elec_computer','basic_metal','metal_products','equipment','electrical','comm_devices','cars','sugar','multidisciplinary','supply_elec_gas','food','drug','chemical','contracting','wholesale','retail','tile','cement','non_metal','hotel','investments','banks','other_financial','transportation','water_transportation','financial','insurance','auxiliary','etf','financing_bonds','estate','engineering','app_computer','information','technical_services','artistic','telecommunication','tanning']    
+    
     for item in has:
-        today = apps.get_model('archive',item).objects.filter(date='2020-7-4')
+        today = apps.get_model('archive',item).objects.filter(date=datetime.date.today())
+        for intodat in today :
+            if(len(intodat.data) > 30 and len(intodat.data) < 200):
+
+                site = Archive.objects.filter(name=intodat.name)
+                group = site[0].group
+
+                url = site[0].url
+                response = requests.get(url)
+                plain_response = response.text
+                in_page = re.compile("TopInst=(.*)")
+                data_inpage = in_page.findall(plain_response)
+
+                my_obj = {'data':[]}
+            
+                for data in data_inpage :
+                    arr = data.split(',')
+                    my_obj['data'].append({'vl' : arr[8].rsplit('=')[1]}) 
+                    my_obj['data'].append({'cs' : arr[10].rsplit('=')[1]}) 
+                    my_obj['data'].append({'avm' : arr[24].rsplit('=')[1].replace("'","")}) 
+                    my_obj['data'].append({'sf' : arr[26].rsplit('=')[1].replace("'","")}) 
+
+                url2 = site[0].api
+                response2 = requests.get(url2)
+                plain_api = response2.text
+                in_api = re.compile("A.*")
+                data_inapi = in_api.findall(plain_api)
+                        
+                if(len(str(data_inapi)) > 20):
+                    for data in data_inapi :
+                        arr = data.split(',')
+                        my_obj['data'].append({"pi":arr[1]}) 
+                        my_obj['data'].append({"pe":arr[2]}) 
+                        my_obj['data'].append({"ct":arr[7]}) 
+                        my_obj['data'].append({"vt":arr[8]}) 
+                        my_obj['data'].append({"value_t":arr[9]}) 
+                        if(group == 'etf'):
+                            my_obj['data'].append({"da":arr[13]})
+                            nav = arr[14].split(';') 
+                            my_obj['data'].append({"nav":nav[0]}) 
+
+                    for data in data_inapi :
+                        arr = data.split(';')
+                        arr = arr[4]
+                        if(len(str(arr)) > 5): 
+
+                            arr = arr.split(',')
+                            
+                            my_obj['data'].append({"vbs":arr[0]}) 
+                            my_obj['data'].append({"vbc":arr[1]}) 
+                            my_obj['data'].append({"vss":arr[3]}) 
+                            my_obj['data'].append({"vsc":arr[4]}) 
+
+                            my_obj['data'].append({"cbs":arr[5]}) 
+                            my_obj['data'].append({"cbc":arr[6]}) 
+                            my_obj['data'].append({"css":arr[8]}) 
+                            my_obj['data'].append({"csc":arr[9]}) 
+                                        
+                else:
+                    in_api = re.compile("IS.*")
+                    data_inapi = in_api.findall(plain_api)
+                    if(len(str(data_inapi)) > 5):
+                        
+                        for data in data_inapi :
+                            arr = data.split(',')
+                            if(int(arr[7]) > 0):
+                                my_obj['data'].append({"pi":arr[1]}) 
+                                my_obj['data'].append({"pe":arr[2]}) 
+                                my_obj['data'].append({"ct":arr[7]}) 
+                                my_obj['data'].append({"vt":arr[8]}) 
+                                my_obj['data'].append({"value_t":arr[9]}) 
+
+                                for data in data_inapi :
+                                    arr = data.split(';')
+                                    arr = arr[4]
+                                    arr = arr.split(',')
+                                    my_obj['data'].append({"vbs":arr[0]}) 
+                                    my_obj['data'].append({"vbc":arr[1]}) 
+                                    my_obj['data'].append({"vss":arr[3]}) 
+                                    my_obj['data'].append({"vsc":arr[4]}) 
+
+                                    my_obj['data'].append({"cbs":arr[5]}) 
+                                    my_obj['data'].append({"cbc":arr[6]}) 
+                                    my_obj['data'].append({"css":arr[8]}) 
+                                    my_obj['data'].append({"csc":arr[9]}) 
+                                
+                            else:
+                                my_obj=['Stopped stock']
+                    else:
+                        my_obj=['IS AND A NOT EXIST !!']
+                
+                if(len(my_obj['data']) > 180):
+
+                    we_model = namadtomodel.objects.filter(namad=group)
+                    apply_model = we_model[0].model
+                    apps.get_model('archive',apply_model).objects.filter(name=intodat.name,date=datetime.date.today()).update(data=my_obj['data'])
+    
+
+    
+    for item in has:
+        today = apps.get_model('archive',item).objects.filter(date=datetime.date.today())
         for intodat in today :
             if(len(intodat.data) > 30 and len(intodat.data) < 200):
                 incom['name'].append({intodat.name})
 
     return HttpResponse(incom['name'])
-
+    
 
 def daily_check(request):
     datain_archive = Archive.objects.all()
@@ -59,7 +162,7 @@ def daily_check(request):
         if arch not in today_list['name']:
             diff.append(arch)
 
-    return HttpResponse(diff)
+    return HttpResponse( diff)
 
 def delete(request,group):
     apps.get_model('archive',group).objects.all().delete()
@@ -73,8 +176,6 @@ start_date = ''
 end_date = ''
 
 def history(request,group,start_time,end_time,name):
-    has = ['agriculture','coal','oil_gas','metal_ores','other_mines','textiles','wood','paper','printz','pet_products','plastic','elec_computer','basic_metal','metal_products','equipment','electrical','comm_devices','cars','sugar','multidisciplinary','supply_elec_gas','food','drug','chemical','contracting','wholesale','retail','tile','cement','non_metal','hotel','investments','banks','other_financial','transportation','water_transportation','financial','insurance','auxiliary','etf','financing_bonds','estate','engineering','app_computer','information','technical_services','artistic','telecommunication','tanning']
-    if(group in has):
 
         start_time = start_time.split(',')
         end_time = end_time.split(',')
@@ -139,8 +240,6 @@ def history(request,group,start_time,end_time,name):
 
             else:
                 my_obj=['Stopped stock']
-    else:
-        return HttpResponse('نام گروه رو بد وارد کردی')        
 
 
 
