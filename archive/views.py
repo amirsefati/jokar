@@ -130,7 +130,7 @@ def incomp(request):
 
                     we_model = namadtomodel.objects.filter(namad=group)
                     apply_model = we_model[0].model
-                    apps.get_model('archive',apply_model).objects.filter(name=intodat.name,date=datetime.date.today()).update(data=my_obj['data'])
+                    apps.get_model('archive',apply_model).objects.filter(name=intodat.name,date=datetime.date.today()).update(data=my_obj)
     
 
     
@@ -168,10 +168,8 @@ def delete(request,group):
     apps.get_model('archive',group).objects.all().delete()
 
 
-def datarange(start_date,end_date):
-    for n in range((end_date - start_date).days):
-        yield start_date + timedelta(n)
-
+    
+    
 start_date = ''
 end_date = ''
 
@@ -183,64 +181,79 @@ def history(request,group,start_time,end_time,name):
         end_date = date(int(end_time[0]),int(end_time[1]),int(end_time[2]))
 
         check = Archive.objects.filter(name=name)
-        url = check[0].history
+        url2 = check[0].history
         
+        step_day = {'day':[]}
+        for n in range((end_date - start_date).days):
+            step_day['day'].append(start_date + timedelta(n))
+
         #model = apps.get_model('archive', group)
+        ddd = {'d':[]}
 
-        for single_date in datarange(start_date,end_date): 
+        for single_date in step_day['day']: 
+
+            hasnt = apps.get_model('archive',group).objects.filter(name=name,date=single_date.strftime("%Y-%m-%d"))
             
-            amir= single_date.strftime("%Y%m%d")
-            url = "{}{}".format(url,amir)
-            
-            response = requests.get(url)
-            data = response.text
 
-            hiderow = re.compile("var\s+ClosingPriceData=(.*)")
-            hidden = hiderow.findall(data)
-
-            mamad = 2
-            for char in hidden :
-                for char2 in char : 
-                    mamad +=1 
-            
-            my_obj = {'data':[]}
-
-            if(mamad > 50):   
+            if(len(hasnt) < 1):   
                 
-                #Get End Price
-                end = re.compile("var\s+ClosingPriceData=(.*)")
-                endprice = end.findall(data)
+                now = ''
+                now = single_date.strftime("%Y%m%d")
 
-                for item in endprice :
-                    item5 = item.replace('[[','[')
-                    item6 = item5.replace(']]',']')
-                    item7 = item6.split('],[')
-                    item8 = item7[-1]
-                    item9 = item8.replace("'","")
-                    item10 = item9.split(',')
-                    my_obj['data'].append({'pi' : item10[2]}) 
-                    my_obj['data'].append({'pe' : item10[3]}) 
-                    my_obj['data'].append({'ct' : item10[8]}) 
-                    my_obj['data'].append({'vt' : item10[9]}) 
-                    my_obj['data'].append({'value_t' : item10[10]}) 
+                url = "{}{}".format(url2,now)
+                
 
-                p = re.compile("var\s+ClientTypeData=(.*)")
-                b = p.findall(data) 
-                for item in b :
-                    item2 = item.split(',')
-                    my_obj['data'].append({'vbs' : item2[4]}) 
-                    my_obj['data'].append({'vbc' : item2[5]}) 
-                    my_obj['data'].append({'vss' : item2[6]}) 
-                    my_obj['data'].append({'vsc' : item2[7]}) 
-                    my_obj['data'].append({'cbs' : item2[0]}) 
-                    my_obj['data'].append({'cbc' : item2[1]}) 
-                    my_obj['data'].append({'css' : item2[2]}) 
-                    my_obj['data'].append({'csc' : item2[3]}) 
-                    apps.get_model('archive',group).objects.create(name=name,kind=check[0].kind,date=single_date.strftime("%Y-%m-%d"),data=my_obj)
+                response = requests.get(url)
+                data = response.text
 
-            else:
-                my_obj=['Stopped stock']
+                hiderow = re.compile("var\s+ClosingPriceData=(.*)")
+                hidden = hiderow.findall(data)
 
+                mamad = 2
+                for char in hidden :
+                    for char2 in char : 
+                        mamad +=1 
+                
+                my_obj = {'data':[]}
+
+                if(mamad > 50):   
+                    
+                    ddd['d'].append({single_date.strftime("%Y-%m-%d"),'OK'})
+
+                    #Get End Price
+                    end = re.compile("var\s+ClosingPriceData=(.*)")
+                    endprice = end.findall(data)
+
+                    for item in endprice :
+                        item5 = item.replace('[[','[')
+                        item6 = item5.replace(']]',']')
+                        item7 = item6.split('],[')
+                        item8 = item7[-1]
+                        item9 = item8.replace("'","")
+                        item10 = item9.split(',')
+                        my_obj['data'].append({'pi' : item10[2]}) 
+                        my_obj['data'].append({'pe' : item10[3]}) 
+                        my_obj['data'].append({'ct' : item10[8]}) 
+                        my_obj['data'].append({'vt' : item10[9]}) 
+                        my_obj['data'].append({'value_t' : item10[10]}) 
+
+                    p = re.compile("var\s+ClientTypeData=(.*)")
+                    b = p.findall(data) 
+                    for item in b :
+                        item2 = item.split(',')
+                        my_obj['data'].append({'vbs' : item2[4]}) 
+                        my_obj['data'].append({'vbc' : item2[5]}) 
+                        my_obj['data'].append({'vss' : item2[6]}) 
+                        my_obj['data'].append({'vsc' : item2[7]}) 
+                        my_obj['data'].append({'cbs' : item2[0]}) 
+                        my_obj['data'].append({'cbc' : item2[1]}) 
+                        my_obj['data'].append({'css' : item2[2]}) 
+                        my_obj['data'].append({'csc' : item2[3]}) 
+                        apps.get_model('archive',group).objects.create(name=name,kind=check[0].kind,date=single_date.strftime("%Y-%m-%d"),data=my_obj)
+
+                else:
+                    ddd['d'].append({single_date.strftime("%Y-%m-%d"),'Stop Stock'})
+        return HttpResponse(ddd['d'])
 
 
 def daily(request,group): 
