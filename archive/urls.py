@@ -8,6 +8,7 @@ urlpatterns = [
     path('delete/<group>',views.delete),
     path('daily_check/',views.daily_check),
     path('incomp/',views.incomp),
+    path('incomp_count/',views.incomp_count),
 
 
 ]

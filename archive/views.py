@@ -30,6 +30,23 @@ from archive.models import information,technical_services,artistic,tanning
 from archive.models import telecommunication
 
 
+def incomp_count(request):
+
+    incom = {'name':[]}
+    has = ['agriculture','coal','oil_gas','metal_ores','other_mines','textiles','wood','paper','printz','pet_products','plastic','elec_computer','basic_metal','metal_products','equipment','electrical','comm_devices','cars','sugar','multidisciplinary','supply_elec_gas','food','drug','chemical','contracting','wholesale','retail','tile','cement','non_metal','hotel','investments','banks','other_financial','transportation','water_transportation','financial','insurance','auxiliary','etf','financing_bonds','estate','engineering','app_computer','information','technical_services','artistic','telecommunication','tanning']    
+    
+
+    for item in has:
+        #edit
+        today = apps.get_model('archive',item).objects.filter(date=datetime.date.today())
+        for intodat in today :
+            if(len(intodat.data) > 30 and len(intodat.data) < 330):
+                incom['name'].append({intodat.name})
+
+    return HttpResponse(incom['name'])
+    
+
+
 def incomp(request):
     incom = {'name':[]}
     has = ['agriculture','coal','oil_gas','metal_ores','other_mines','textiles','wood','paper','printz','pet_products','plastic','elec_computer','basic_metal','metal_products','equipment','electrical','comm_devices','cars','sugar','multidisciplinary','supply_elec_gas','food','drug','chemical','contracting','wholesale','retail','tile','cement','non_metal','hotel','investments','banks','other_financial','transportation','water_transportation','financial','insurance','auxiliary','etf','financing_bonds','estate','engineering','app_computer','information','technical_services','artistic','telecommunication','tanning']    
@@ -38,7 +55,7 @@ def incomp(request):
         #edit
         today = apps.get_model('archive',item).objects.filter(date=datetime.date.today())
         for intodat in today :
-            if(len(intodat.data) > 30 and len(intodat.data) < 200):
+            if(len(intodat.data) > 30 and len(intodat.data) < 330):
 
                 site = Archive.objects.filter(name=intodat.name)
                 group = site[0].group
@@ -59,59 +76,44 @@ def incomp(request):
                     my_obj['data'].append({'sf' : arr[26].rsplit('=')[1].replace("'","")}) 
 
                 url2 = site[0].api
+                in_api = re.compile("A.*")
 
                 response2 = requests.get(url2)
                 plain_api2 = response2.text
-                plain_api = plain_api2
+                plain_api2 = plain_api2
+                data_inapi2 = in_api.findall(plain_api2)
+                data_inapi = data_inapi2
 
-                response3 = requests.get(url2)
-                plain_api3 = response3.text
-                if(len(plain_api3) > len(plain_api2)):
-                    plain_api =  plain_api3
+                if(len(str(data_inapi)) > 30):
+                        for data in data_inapi :
+                            arr = data.split(',')
+                            my_obj['data'].append({"pi":arr[1]}) 
+                            my_obj['data'].append({"pe":arr[2]}) 
+                            my_obj['data'].append({"ct":arr[7]}) 
+                            my_obj['data'].append({"vt":arr[8]}) 
+                            my_obj['data'].append({"value_t":arr[9]}) 
+                            if(group == 'etf'):
+                                my_obj['data'].append({"da":arr[13]})
+                                nav = arr[14].split(';') 
+                                my_obj['data'].append({"nav":nav[0]}) 
 
-                response4 = requests.get(url2)
-                plain_api4 = response4.text
-                if(len(plain_api4) > len(plain_api3)):
-                    plain_api =  plain_api4
+                        for data in data_inapi :
+                            arr = data.split(';')
+                            arr = arr[4]
+                            if(len(str(arr)) > 5): 
 
-                response5 = requests.get(url2)
-                plain_api5 = response5.text
-                if(len(plain_api5) > len(plain_api4)):
-                    plain_api =  plain_api5
+                                arr = arr.split(',')
+                                
+                                my_obj['data'].append({"vbs":arr[0]}) 
+                                my_obj['data'].append({"vbc":arr[1]}) 
+                                my_obj['data'].append({"vss":arr[3]}) 
+                                my_obj['data'].append({"vsc":arr[4]}) 
 
-                in_api = re.compile("A.*")
-                data_inapi = in_api.findall(plain_api)
-                        
-                if(len(str(data_inapi)) > 20):
-                    for data in data_inapi :
-                        arr = data.split(',')
-                        my_obj['data'].append({"pi":arr[1]}) 
-                        my_obj['data'].append({"pe":arr[2]}) 
-                        my_obj['data'].append({"ct":arr[7]}) 
-                        my_obj['data'].append({"vt":arr[8]}) 
-                        my_obj['data'].append({"value_t":arr[9]}) 
-                        if(group == 'etf'):
-                            my_obj['data'].append({"da":arr[13]})
-                            nav = arr[14].split(';') 
-                            my_obj['data'].append({"nav":nav[0]}) 
-
-                    for data in data_inapi :
-                        arr = data.split(';')
-                        arr = arr[4]
-                        if(len(str(arr)) > 5): 
-
-                            arr = arr.split(',')
-                            
-                            my_obj['data'].append({"vbs":arr[0]}) 
-                            my_obj['data'].append({"vbc":arr[1]}) 
-                            my_obj['data'].append({"vss":arr[3]}) 
-                            my_obj['data'].append({"vsc":arr[4]}) 
-
-                            my_obj['data'].append({"cbs":arr[5]}) 
-                            my_obj['data'].append({"cbc":arr[6]}) 
-                            my_obj['data'].append({"css":arr[8]}) 
-                            my_obj['data'].append({"csc":arr[9]}) 
-                                        
+                                my_obj['data'].append({"cbs":arr[5]}) 
+                                my_obj['data'].append({"cbc":arr[6]}) 
+                                my_obj['data'].append({"css":arr[8]}) 
+                                my_obj['data'].append({"csc":arr[9]}) 
+                                                
                 else:
                     in_api = re.compile("IS.*")
                     data_inapi = in_api.findall(plain_api)
@@ -125,6 +127,18 @@ def incomp(request):
                                 my_obj['data'].append({"ct":arr[7]}) 
                                 my_obj['data'].append({"vt":arr[8]}) 
                                 my_obj['data'].append({"value_t":arr[9]}) 
+
+                                for data in data_inapi :
+                                        arr = data.split(';')
+                                        arr = arr[2]
+                                        if(len(str(arr)) > 3): 
+
+                                            arr = arr.split('@')
+                                            
+                                            my_obj['data'].append({"bbv":arr[1]}) 
+                                            my_obj['data'].append({"bbp":arr[2]}) 
+                                            my_obj['data'].append({"sbp":arr[3]}) 
+                                            my_obj['data'].append({"sbv":arr[4]}) 
 
                                 for data in data_inapi :
                                     arr = data.split(';')
@@ -145,8 +159,8 @@ def incomp(request):
                     else:
                         my_obj=['IS AND A NOT EXIST !!']
                 
-                if(len(my_obj['data']) > 110):
-
+                if(len(str(my_obj['data'])) > 330):
+                    
                     we_model = namadtomodel.objects.filter(namad=group)
                     apply_model = we_model[0].model
                     #edit
@@ -158,7 +172,7 @@ def incomp(request):
         #edit
         today = apps.get_model('archive',item).objects.filter(date=datetime.date.today())
         for intodat in today :
-            if(len(intodat.data) > 30 and len(intodat.data) < 200):
+            if(len(intodat.data) > 30 and len(intodat.data) < 300):
                 incom['name'].append({intodat.name})
 
     return HttpResponse(incom['name'])
@@ -563,7 +577,21 @@ def daily(request,group):
                         my_obj['data'].append({"da":arr[13]})
                         nav = arr[14].split(';') 
                         my_obj['data'].append({"nav":nav[0]}) 
+                
+                #new
+                for data in data_inapi :
+                    arr = data.split(';')
+                    arr = arr[2]
+                    if(len(str(arr)) > 3): 
 
+                        arr = arr.split('@')
+                        
+                        my_obj['data'].append({"bbv":arr[1]}) 
+                        my_obj['data'].append({"bbp":arr[2]}) 
+                        my_obj['data'].append({"sbp":arr[3]}) 
+                        my_obj['data'].append({"sbv":arr[4]}) 
+
+                       
                 for data in data_inapi :
                     arr = data.split(';')
                     arr = arr[4]
@@ -594,6 +622,19 @@ def daily(request,group):
                             my_obj['data'].append({"ct":arr[7]}) 
                             my_obj['data'].append({"vt":arr[8]}) 
                             my_obj['data'].append({"value_t":arr[9]}) 
+
+                            for data in data_inapi :
+                                arr = data.split(';')
+                                arr = arr[2]
+                                if(len(str(arr)) > 3): 
+
+                                    arr = arr.split('@')
+                                    
+                                    my_obj['data'].append({"bbv":arr[1]}) 
+                                    my_obj['data'].append({"bbp":arr[2]}) 
+                                    my_obj['data'].append({"sbp":arr[3]}) 
+                                    my_obj['data'].append({"sbv":arr[4]}) 
+
 
                             for data in data_inapi :
                                 arr = data.split(';')
