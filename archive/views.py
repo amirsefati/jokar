@@ -7,8 +7,9 @@ import json
 from django.apps import apps
 from datetime import timedelta,date
 
+from archive.models import Archive,namadtomodel,active_date
+
 #4-16
-from archive.models import Archive,namadtomodel
 from archive.models import agriculture,coal,oil_gas,metal_ores
 from archive.models import other_mines,textiles,wood,paper
 from archive.models import printz,pet_products,plastic,elec_computer
@@ -79,12 +80,13 @@ def incomp(request):
                 in_api = re.compile("A.*")
 
                 response2 = requests.get(url2)
-                plain_api2 = response2.text
-                plain_api2 = plain_api2
-                data_inapi2 = in_api.findall(plain_api2)
-                data_inapi = data_inapi2
+                response2 = requests.get(url2)
 
-                if(len(str(data_inapi)) > 30):
+                plain_api = response2.text
+                data_inapi = in_api.findall(plain_api)
+
+                if(len(str(data_inapi)) > 330):
+                    
                         for data in data_inapi :
                             arr = data.split(',')
                             my_obj['data'].append({"pi":arr[1]}) 
@@ -96,14 +98,23 @@ def incomp(request):
                                 my_obj['data'].append({"da":arr[13]})
                                 nav = arr[14].split(';') 
                                 my_obj['data'].append({"nav":nav[0]}) 
+                        
+                        for data in data_inapi :
+                            arr = data.split(';')
+                            arr = arr[2]
+                            if(len(str(arr)) > 3): 
+
+                                arr = arr.split('@')               
+                                my_obj['data'].append({"bbv":arr[1]}) 
+                                my_obj['data'].append({"bbp":arr[2]}) 
+                                my_obj['data'].append({"sbp":arr[3]}) 
+                                my_obj['data'].append({"sbv":arr[4]}) 
 
                         for data in data_inapi :
                             arr = data.split(';')
                             arr = arr[4]
-                            if(len(str(arr)) > 5): 
-
-                                arr = arr.split(',')
-                                
+                            arr = arr.split(',')
+                            if(len(str(arr)) > 20):
                                 my_obj['data'].append({"vbs":arr[0]}) 
                                 my_obj['data'].append({"vbc":arr[1]}) 
                                 my_obj['data'].append({"vss":arr[3]}) 
@@ -113,7 +124,12 @@ def incomp(request):
                                 my_obj['data'].append({"cbc":arr[6]}) 
                                 my_obj['data'].append({"css":arr[8]}) 
                                 my_obj['data'].append({"csc":arr[9]}) 
-                                                
+                            
+                        we_model = namadtomodel.objects.filter(namad=group)
+                        apply_model = we_model[0].model
+                        #edit
+                        apps.get_model('archive',apply_model).objects.filter(name=intodat.name,date=datetime.date.today()).update(data=my_obj)
+                        
                 else:
                     in_api = re.compile("IS.*")
                     data_inapi = in_api.findall(plain_api)
@@ -129,16 +145,16 @@ def incomp(request):
                                 my_obj['data'].append({"value_t":arr[9]}) 
 
                                 for data in data_inapi :
-                                        arr = data.split(';')
-                                        arr = arr[2]
-                                        if(len(str(arr)) > 3): 
+                                    arr = data.split(';')
+                                    arr = arr[2]
+                                    if(len(str(arr)) > 3): 
 
-                                            arr = arr.split('@')
+                                        arr = arr.split('@')
                                             
-                                            my_obj['data'].append({"bbv":arr[1]}) 
-                                            my_obj['data'].append({"bbp":arr[2]}) 
-                                            my_obj['data'].append({"sbp":arr[3]}) 
-                                            my_obj['data'].append({"sbv":arr[4]}) 
+                                        my_obj['data'].append({"bbv":arr[1]}) 
+                                        my_obj['data'].append({"bbp":arr[2]}) 
+                                        my_obj['data'].append({"sbp":arr[3]}) 
+                                        my_obj['data'].append({"sbv":arr[4]}) 
 
                                 for data in data_inapi :
                                     arr = data.split(';')
@@ -153,30 +169,27 @@ def incomp(request):
                                     my_obj['data'].append({"cbc":arr[6]}) 
                                     my_obj['data'].append({"css":arr[8]}) 
                                     my_obj['data'].append({"csc":arr[9]}) 
-                                
+                        
+                                we_model = namadtomodel.objects.filter(namad=group)
+                                apply_model = we_model[0].model
+                                #edit
+                                apps.get_model('archive',apply_model).objects.filter(name=intodat.name,date=datetime.date.today()).update(data=my_obj)
+                
                             else:
                                 my_obj=['Stopped stock']
                     else:
                         my_obj=['IS AND A NOT EXIST !!']
                 
-                if(len(str(my_obj['data'])) > 330):
-                    
-                    we_model = namadtomodel.objects.filter(namad=group)
-                    apply_model = we_model[0].model
-                    #edit
-                    apps.get_model('archive',apply_model).objects.filter(name=intodat.name,date=datetime.date.today()).update(data=my_obj)
-    
-
-    
     for item in has:
         #edit
         today = apps.get_model('archive',item).objects.filter(date=datetime.date.today())
         for intodat in today :
-            if(len(intodat.data) > 30 and len(intodat.data) < 300):
+            if(len(intodat.data) > 30 and len(intodat.data) < 330):
                 incom['name'].append({intodat.name})
 
     return HttpResponse(incom['name'])
     
+
 
 def daily_check(request):
     datain_archive = Archive.objects.all()
@@ -227,67 +240,69 @@ def history(request,group,start_time,end_time,name):
 
         for single_date in step_day['day']: 
 
-            hasnt = apps.get_model('archive',group).objects.filter(name=name,date=single_date.strftime("%Y-%m-%d"))
-            
+            activedate = active_date.objects.filter(miladi=single_date.strftime("%Y%m%d"))
+            if(len(str(activedate)) > 30):
 
-            if(len(hasnt) < 1):   
-                
-                now = ''
-                now = single_date.strftime("%Y%m%d")
+                hasnt = apps.get_model('archive',group).objects.filter(name=name,date=single_date.strftime("%Y-%m-%d"))
 
-                url = "{}{}".format(url2,now)
-                
-
-                response = requests.get(url)
-                data = response.text
-
-                hiderow = re.compile("var\s+ClosingPriceData=(.*)")
-                hidden = hiderow.findall(data)
-
-                mamad = 2
-                for char in hidden :
-                    for char2 in char : 
-                        mamad +=1 
-                
-                my_obj = {'data':[]}
-
-                if(mamad > 50):   
+                if(len(hasnt) < 1):   
                     
-                    ddd['d'].append({single_date.strftime("%Y-%m-%d"),'OK'})
+                    now = ''
+                    now = single_date.strftime("%Y%m%d")
 
-                    #Get End Price
-                    end = re.compile("var\s+ClosingPriceData=(.*)")
-                    endprice = end.findall(data)
+                    url = "{}{}".format(url2,now)
+                    
 
-                    for item in endprice :
-                        item5 = item.replace('[[','[')
-                        item6 = item5.replace(']]',']')
-                        item7 = item6.split('],[')
-                        item8 = item7[-1]
-                        item9 = item8.replace("'","")
-                        item10 = item9.split(',')
-                        my_obj['data'].append({'pi' : item10[2]}) 
-                        my_obj['data'].append({'pe' : item10[3]}) 
-                        my_obj['data'].append({'ct' : item10[8]}) 
-                        my_obj['data'].append({'vt' : item10[9]}) 
-                        my_obj['data'].append({'value_t' : item10[10]}) 
+                    response = requests.get(url)
+                    data = response.text
 
-                    p = re.compile("var\s+ClientTypeData=(.*)")
-                    b = p.findall(data) 
-                    for item in b :
-                        item2 = item.split(',')
-                        my_obj['data'].append({'vbs' : item2[4]}) 
-                        my_obj['data'].append({'vbc' : item2[5]}) 
-                        my_obj['data'].append({'vss' : item2[6]}) 
-                        my_obj['data'].append({'vsc' : item2[7]}) 
-                        my_obj['data'].append({'cbs' : item2[0]}) 
-                        my_obj['data'].append({'cbc' : item2[1]}) 
-                        my_obj['data'].append({'css' : item2[2]}) 
-                        my_obj['data'].append({'csc' : item2[3]}) 
-                        apps.get_model('archive',group).objects.create(name=name,kind=check[0].kind,date=single_date.strftime("%Y-%m-%d"),data=my_obj)
+                    hiderow = re.compile("var\s+ClientTypeData=(.*)")
+                    hidden = hiderow.findall(data)
 
-                else:
-                    ddd['d'].append({single_date.strftime("%Y-%m-%d"),'Stop Stock'})
+                   
+                    
+                    my_obj = {'data':[]}
+
+                    if(len(str(hidden)) > 150):   
+                        
+                        ddd['d'].append({single_date.strftime("%Y-%m-%d"),'OK'})
+
+                      
+                        p = re.compile("var\s+ClientTypeData=(.*)")
+                        b = p.findall(data) 
+                        for item in b :
+                            item2 = item.split(',')
+                            my_obj['data'].append({'vbs' : item2[4]}) 
+                            my_obj['data'].append({'vbc' : item2[5]}) 
+                            my_obj['data'].append({'vss' : item2[6]}) 
+                            my_obj['data'].append({'vsc' : item2[7]}) 
+                            my_obj['data'].append({'cbs' : item2[0]}) 
+                            my_obj['data'].append({'cbc' : item2[1]}) 
+                            my_obj['data'].append({'css' : item2[2]}) 
+                            my_obj['data'].append({'csc' : item2[3]}) 
+                        
+                        #Get End Price
+                        end = re.compile("var\s+ClosingPriceData=(.*)")
+                        endprice = end.findall(data)
+
+                        for item in endprice :
+                            item5 = item.replace('[[','[')
+                            item6 = item5.replace(']]',']')
+                            item7 = item6.split('],[')
+                            item8 = item7[-1]
+                            item9 = item8.replace("'","")
+                            item10 = item9.split(',')
+                            my_obj['data'].append({'pi' : item10[2]}) 
+                            my_obj['data'].append({'pe' : item10[3]}) 
+                            my_obj['data'].append({'ct' : item10[8]}) 
+                            my_obj['data'].append({'vt' : item10[9]}) 
+                            my_obj['data'].append({'value_t' : item10[10]}) 
+
+                            apps.get_model('archive',group).objects.create(name=name,kind=check[0].kind,date=single_date.strftime("%Y-%m-%d"),data=my_obj)
+
+                    else:
+                        apps.get_model('archive',group).objects.create(name=name,kind=check[0].kind,date=single_date.strftime("%Y-%m-%d"),data='error_history')
+
         return HttpResponse(ddd['d'])
 
 

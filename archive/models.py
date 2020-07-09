@@ -14,6 +14,10 @@ class namadtomodel(models.Model):
     namad = models.CharField(max_length=250)
     model = models.CharField(max_length=100)
 
+class active_date(models.Model):
+    jalali = models.CharField(max_length=250)
+    miladi = models.CharField(max_length=100)
+
 #1-4
 class agriculture(models.Model):
     name  = models.CharField(max_length=100)
