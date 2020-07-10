@@ -25,7 +25,7 @@ SECRET_KEY = 'd#7%w#ypf!7rv2187+cgh8msr_4o0nau5+v$qe1%*1!r!(-xqv'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['45.82.137.113']
 #'45.82.137.113'
 
 # Application definition
@@ -55,7 +55,7 @@ ROOT_URLCONF = 'tse.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

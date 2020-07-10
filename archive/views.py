@@ -32,20 +32,19 @@ from archive.models import telecommunication
 
 
 def incomp_count(request):
-
     incom = {'name':[]}
     has = ['agriculture','coal','oil_gas','metal_ores','other_mines','textiles','wood','paper','printz','pet_products','plastic','elec_computer','basic_metal','metal_products','equipment','electrical','comm_devices','cars','sugar','multidisciplinary','supply_elec_gas','food','drug','chemical','contracting','wholesale','retail','tile','cement','non_metal','hotel','investments','banks','other_financial','transportation','water_transportation','financial','insurance','auxiliary','etf','financing_bonds','estate','engineering','app_computer','information','technical_services','artistic','telecommunication','tanning']    
     
 
     for item in has:
-        #edit
-        today = apps.get_model('archive',item).objects.filter(date=datetime.date.today())
+        #edit          datetime.date.today()
+        today = apps.get_model('archive',item).objects.filter(date='2020-7-08')
         for intodat in today :
             if(len(intodat.data) > 30 and len(intodat.data) < 330):
                 incom['name'].append({intodat.name})
 
-    return HttpResponse(incom['name'])
-    
+    return render(request,'daily_icomp_all.html',{'inc':incom['name']}) 
+
 
 
 def incomp(request):
@@ -259,11 +258,12 @@ def history(request,group,start_time,end_time,name):
                     hiderow = re.compile("var\s+ClientTypeData=(.*)")
                     hidden = hiderow.findall(data)
 
-                   
+                    end = re.compile("var\s+ClosingPriceData=(.*)")
+                    endprice = end.findall(data)
                     
                     my_obj = {'data':[]}
 
-                    if(len(str(hidden)) > 150):   
+                    if(len(str(hidden)) > 150 and len(str(endprice)) > 100):   
                         
                         ddd['d'].append({single_date.strftime("%Y-%m-%d"),'OK'})
 
