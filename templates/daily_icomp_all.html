@@ -1,3 +1,136 @@
 <html>
-    <h1> AMIR IS HERE - {{inc}}</h1>
+    <head>
+        <title> جوکار اپ</title>
+        <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+        <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v26.0.2/dist/font-face.css" rel="stylesheet" type="text/css" />
+        <style>
+        body{
+            font-family: 'Vazir'!important;
+        }
+        a{
+          text-decoration:none;
+        }
+        li{
+          float:right;
+          padding:5px;
+        }
+        </style>
+    </head>
+    <body style="background:#F1F7ED;margin:0px">
+      <div style="width:100%;height:60px;background:#006D77">
+        <ul style="list-style-type:none;text-align:center">
+          <li><a href="http://localhost:8000/api/check_all_date/2020,7,1/2020,7,7"><p style="color:white;margin-top:12px">نمودار روزهای سابقه</p></a></li>
+          <li><a href=""><p style="color:white;margin-top:12px">نمودار بررسی امروز</p></a></li>
+        
+        </ul>
+      </div>
+      <div style="text-align:center">
+        <p style="font-size:22px">نمودار تحلیلی سابقه </p>
+      </div>
+
+      <div style="text-align:center;padding:5px">
+        <p style="font-size:14px;margin-top:5px"> نمودار تحلیلی با بازه انتخابی حداکثر 3 ماهه با قابلیت تفکیک </p>
+      </div>
+      <div style="margin-top:20px">
+        <div id="chart">
+        </div>
+      </div>
+    </body>
+
+
+    <script>
+         
+        var options = {
+          series: [{
+          name: 'نماد گرفته شده',
+          type: 'column',
+          data: {{ok}},
+        }
+        ,{
+          name: 'تعداد روز های خراب',
+          type: 'line',
+          data: {{err}}
+        }],
+          chart: {
+          height: 450,
+          type: 'line',
+          stacked: false,
+          fontFamily:'Vazir',
+        },
+        colors:['#06BA63', '#C33149'],
+        dataLabels: {
+          enabled: false
+        },
+        stroke: {
+          width: [1,6]
+        },
+        xaxis: {
+          categories: {{timer|safe}},
+        },
+        yaxis: [
+          {
+            axisTicks: {
+              show: true,
+            },
+            axisBorder: {
+              show: true,
+              color: '#008FFB'
+            },
+            labels: {
+              style: {
+                colors: '#008FFB',
+              }
+            },
+            title: {
+              text: "نماد ها کاملا درست",
+              style: {
+                color: '#008FFB',
+              }
+            },
+            tooltip: {
+              enabled: true
+            }
+          },
+         
+          {
+            seriesName: 'Revenue',
+            opposite: true,
+            axisTicks: {
+              show: true,
+            },
+            axisBorder: {
+              show: true,
+              color: '#92374D'
+            },
+            labels: {
+              style: {
+                colors: '#92374D',
+              },
+            },
+            title: {
+              text: "نماد ها روز های خراب",
+              style: {
+                color: '#92374D',
+              }
+            }
+          },
+        ],
+        tooltip: {
+          fixed: {
+            enabled: true,
+            position: 'topLeft', // topRight, topLeft, bottomRight, bottomLeft
+            offsetY: 30,
+            offsetX: 60
+          },
+        },
+        legend: {
+          horizontalAlign: 'left',
+          offsetX: 40
+        }
+        };
+
+        var chart = new ApexCharts(document.querySelector("#chart"), options);
+        chart.render();
+       
+    </script>
 </html>

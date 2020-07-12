@@ -9,4 +9,9 @@ urlpatterns = [
     path('daily_check/',views.daily_check),
     path('incomp/',views.incomp),
     path('incomp_count/',views.incomp_count),
+
+
+    path('check_all_date/<start>/<end>',views.check_all_date),
+    path('detail_day_namads/<date_namad>',views.detail_day_namads),
+
 ]

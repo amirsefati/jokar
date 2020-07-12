@@ -30,6 +30,77 @@ from archive.models import information,technical_services,artistic,tanning
 #49
 from archive.models import telecommunication
 
+def detail_day_namads(request,date_namad):
+    
+    date_namad = date_namad.split(',')
+    date_namad = date(int(date_namad[0]),int(date_namad[1]),int(date_namad[2]))
+
+    has = ['agriculture','coal','oil_gas','metal_ores','other_mines','textiles','wood','paper','printz','pet_products','plastic','elec_computer','basic_metal','metal_products','equipment','electrical','comm_devices','cars','sugar','multidisciplinary','supply_elec_gas','food','drug','chemical','contracting','wholesale','retail','tile','cement','non_metal','hotel','investments','banks','other_financial','transportation','water_transportation','financial','insurance','auxiliary','etf','financing_bonds','estate','engineering','app_computer','information','technical_services','artistic','telecommunication','tanning']    
+    
+    activedate = active_date.objects.filter(miladi=date_namad.strftime("%Y%m%d"))
+    
+    in_day = {'correct':[],'err':[],'all_data':[],'none':[]}
+
+    if(len(str(activedate)) > 30):
+        for item in has:
+            all_inday_correct = (apps.get_model('archive',item).objects.filter(date=date_namad.strftime("%Y-%m-%d")))            
+            for correct in all_inday_correct:
+                in_day['correct'].append({item : correct.name})
+
+            all_inday_err = (apps.get_model('archive',item).objects.filter(date=date_namad.strftime("%Y-%m-%d"),data='error_history'))
+            for err in all_inday_err:
+                in_day['err'].append({item : err.name})
+
+    all_inday = Archive.objects.all()
+    for all_data in all_inday:
+        gp = namadtomodel.objects.filter(namad=all_data.group)
+        for t in gp:
+            in_day['all_data'].append({t.model:all_data.name})
+
+    for none in in_day['all_data']:
+        if none not in in_day['correct']:
+                in_day['none'].append(none)
+
+    return render(request,'check_on_day_history.html' , {'correct':in_day['correct'],'err':in_day['err'],'all_data':in_day['none']}) 
+
+def check_all_date(request,start,end):
+    
+    start_time = start.split(',')
+    end_time = end.split(',')
+
+    start_date = date(int(start_time[0]),int(start_time[1]),int(start_time[2]))
+    end_date = date(int(end_time[0]),int(end_time[1]),int(end_time[2]))
+
+    incom = {'name':[]}
+    has = ['agriculture','coal','oil_gas','metal_ores','other_mines','textiles','wood','paper','printz','pet_products','plastic','elec_computer','basic_metal','metal_products','equipment','electrical','comm_devices','cars','sugar','multidisciplinary','supply_elec_gas','food','drug','chemical','contracting','wholesale','retail','tile','cement','non_metal','hotel','investments','banks','other_financial','transportation','water_transportation','financial','insurance','auxiliary','etf','financing_bonds','estate','engineering','app_computer','information','technical_services','artistic','telecommunication','tanning']    
+    
+    step_day = {'day':[]}
+    for n in range((end_date - start_date).days):
+        step_day['day'].append(start_date + timedelta(n))
+    
+    ok = []
+    err = []
+    timer = []
+    for single_date in step_day['day']:
+        in_day = {'ok':[],'err':[]}
+        activedate = active_date.objects.filter(miladi=single_date.strftime("%Y%m%d"))
+        if(len(str(activedate)) > 30):
+
+            for item in has:
+                all_inday = (apps.get_model('archive',item).objects.filter(date=single_date.strftime("%Y-%m-%d")))
+                all_inday_err = (apps.get_model('archive',item).objects.filter(date=single_date.strftime("%Y-%m-%d"),data='error_history'))
+
+                for dt in all_inday:
+                    in_day['ok'].append(dt.name)
+
+                for dt in all_inday_err:
+                    in_day['err'].append(dt.name)
+
+            timer.append(single_date.strftime('%d %b %Y'))
+            ok.append(len(in_day['ok']))
+            err.append(len(in_day['err']))
+
+    return render(request,'daily_icomp_all.html' , {'ok':ok,'err':err,'timer':timer}) 
 
 def incomp_count(request):
     incom = {'name':[]}
@@ -243,9 +314,9 @@ def history(request,group,start_time,end_time,name):
             if(len(str(activedate)) > 30):
 
                 hasnt = apps.get_model('archive',group).objects.filter(name=name,date=single_date.strftime("%Y-%m-%d"))
-
-                if(len(hasnt) < 1):   
-                    
+  
+                if(len(str(hasnt)) < 40):   
+ 
                     now = ''
                     now = single_date.strftime("%Y%m%d")
 
