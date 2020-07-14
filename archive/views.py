@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 import requests
 import re
-import datetime 
+import datetime,time
 import json
 from django.apps import apps
 from datetime import timedelta,date
@@ -29,6 +29,100 @@ from archive.models import information,technical_services,artistic,tanning
 
 #49
 from archive.models import telecommunication
+
+def history_revamp(request,start,end):
+
+    export = {'e':[]}
+    start_time = start.split(',')
+    end_time = end.split(',')
+
+    start_date = date(int(start_time[0]),int(start_time[1]),int(start_time[2]))
+    end_date   = date(int(end_time[0]),int(end_time[1]),int(end_time[2]))
+
+    incom = {'db':[]}
+    has = ['agriculture','coal','oil_gas','metal_ores','other_mines','textiles','wood','paper','printz','pet_products','plastic','elec_computer','basic_metal','metal_products','equipment','electrical','comm_devices','cars','sugar','multidisciplinary','supply_elec_gas','food','drug','chemical','contracting','wholesale','retail','tile','cement','non_metal','hotel','investments','banks','other_financial','transportation','water_transportation','financial','insurance','auxiliary','etf','financing_bonds','estate','engineering','app_computer','information','technical_services','artistic','telecommunication','tanning']    
+    
+    step_day = {'day':[]}
+    for n in range((end_date - start_date).days):
+        step_day['day'].append(start_date + timedelta(n))
+
+    for single_date in step_day['day']:
+        for item in has:
+            err_list = (apps.get_model('archive',item).objects.filter(date=single_date.strftime("%Y-%m-%d")))
+            for item in err_list:
+                if(len(str(item.data)) < 60):
+                    incom['db'].append({"name":item.name,"date":single_date.strftime("%Y%m%d")})
+
+    for list_err in incom['db']:
+        check = Archive.objects.filter(name=list_err['name'])
+        name = list_err['name']
+        url2 = check[0].history
+        link = "{}{}".format(url2,list_err['date'])
+
+        group_t1 = namadtomodel.objects.filter(namad=check[0].group)
+        group = group_t1[0].model
+
+        response = requests.get(link)
+        data = response.text
+
+        hiderow = re.compile("var\s+ClientTypeData=(.*)")
+        hidden = hiderow.findall(data)
+
+        end = re.compile("var\s+ClosingPriceData=(.*)")
+        endprice = end.findall(data)
+                    
+        my_obj = {'data':[]}
+
+        if(len(str(hidden)) > 100 and len(str(endprice)) > 100):   
+             
+            p = re.compile("var\s+ClientTypeData=(.*)")
+            b = p.findall(data) 
+            for item in b :
+                item2 = item.split(',')
+                my_obj['data'].append({'vbs' : item2[4]}) 
+                my_obj['data'].append({'vbc' : item2[5]}) 
+                my_obj['data'].append({'vss' : item2[6]}) 
+                my_obj['data'].append({'vsc' : item2[7]}) 
+                my_obj['data'].append({'cbs' : item2[0]}) 
+                my_obj['data'].append({'cbc' : item2[1]}) 
+                my_obj['data'].append({'css' : item2[2]}) 
+                my_obj['data'].append({'csc' : item2[3]}) 
+                        
+                        #Get End Price
+                end = re.compile("var\s+ClosingPriceData=(.*)")
+                endprice = end.findall(data)
+
+                for item in endprice :
+                    item5 = item.replace('[[','[')
+                    item6 = item5.replace(']]',']')
+                    item7 = item6.split('],[')
+                    item8 = item7[-1]
+                    item9 = item8.replace("'","")
+                    item10 = item9.split(',')
+                    my_obj['data'].append({'pi' : item10[2]}) 
+                    my_obj['data'].append({'pe' : item10[3]}) 
+                    my_obj['data'].append({'ct' : item10[8]}) 
+                    my_obj['data'].append({'vt' : item10[9]}) 
+                    my_obj['data'].append({'value_t' : item10[10]}) 
+
+                    apps.get_model('archive',group).objects.filter(name=name,date=single_date.strftime("%Y-%m-%d")).update(data=my_obj)
+                    export['e'].append({list_err['name'],single_date.strftime("%Y-%m-%d") , "DONE"})
+
+        else:
+            export['e'].append({list_err['name'],single_date.strftime("%Y-%m-%d"),"ERR"})
+    return HttpResponse(export['e'])
+
+def get_hisory_group(request,group):
+    
+    #has = ['agriculture','coal','oil_gas','metal_ores','other_mines','textiles','wood','paper','printz','pet_products','plastic','elec_computer','basic_metal','metal_products','equipment','electrical','comm_devices','cars','sugar','multidisciplinary','supply_elec_gas','food','drug','chemical','contracting','wholesale','retail','tile','cement','non_metal','hotel','investments','banks','other_financial','transportation','water_transportation','financial','insurance','auxiliary','etf','financing_bonds','estate','engineering','app_computer','information','technical_services','artistic','telecommunication','tanning']    
+    #for item in has:
+
+        namad = namadtomodel.objects.filter(model=group)
+        all_namad_in_group = Archive.objects.filter(group=namad[0].namad)
+        for namad_in_group in all_namad_in_group:
+            link = "http://45.82.137.113:8000/api/history/{}/2020,3,24/2020,7,7/{}".format(group,namad_in_group.name)
+            requests.get(link)
+            time.sleep(10)
 
 def detail_day_namads(request,date_namad):
     
@@ -115,8 +209,6 @@ def incomp_count(request):
                 incom['name'].append({intodat.name})
 
     return render(request,'daily_icomp_all.html',{'inc':incom['name']}) 
-
-
 
 def incomp(request):
     incom = {'name':[]}
@@ -259,8 +351,6 @@ def incomp(request):
 
     return HttpResponse(incom['name'])
     
-
-
 def daily_check(request):
     datain_archive = Archive.objects.all()
     all_namad = {'name':[]}
@@ -284,9 +374,7 @@ def daily_check(request):
 
 def delete(request,group):
     apps.get_model('archive',group).objects.all().delete()
-
-
-    
+   
     
 start_date = ''
 end_date = ''
@@ -314,9 +402,9 @@ def history(request,group,start_time,end_time,name):
             if(len(str(activedate)) > 30):
 
                 hasnt = apps.get_model('archive',group).objects.filter(name=name,date=single_date.strftime("%Y-%m-%d"))
-  
-                if(len(str(hasnt)) < 40):   
- 
+
+                if(len(str(hasnt)) < 40):
+
                     now = ''
                     now = single_date.strftime("%Y%m%d")
 
@@ -334,7 +422,7 @@ def history(request,group,start_time,end_time,name):
                     
                     my_obj = {'data':[]}
 
-                    if(len(str(hidden)) > 150 and len(str(endprice)) > 100):   
+                    if(len(str(hidden)) > 100 and len(str(endprice)) > 100):   
                         
                         ddd['d'].append({single_date.strftime("%Y-%m-%d"),'OK'})
 
