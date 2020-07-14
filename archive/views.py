@@ -51,7 +51,7 @@ def history_revamp(request,start,end):
             err_list = (apps.get_model('archive',item).objects.filter(date=single_date.strftime("%Y-%m-%d")))
             for item in err_list:
                 if(len(str(item.data)) < 60):
-                    incom['db'].append({"name":item.name,"date":single_date.strftime("%Y%m%d")})
+                    incom['db'].append({"name":item.name,"date":single_date.strftime("%Y%m%d"),"date2":single_date.strftime("%Y-%m-%d")})
 
     for list_err in incom['db']:
         check = Archive.objects.filter(name=list_err['name'])
@@ -105,11 +105,12 @@ def history_revamp(request,start,end):
                     my_obj['data'].append({'vt' : item10[9]}) 
                     my_obj['data'].append({'value_t' : item10[10]}) 
 
-                    apps.get_model('archive',group).objects.filter(name=name,date=single_date.strftime("%Y-%m-%d")).update(data=my_obj)
-                    export['e'].append({list_err['name'],single_date.strftime("%Y-%m-%d") , "DONE"})
+                    apps.get_model('archive',group).objects.filter(name=name,date=list_err['date2']).update(data=my_obj)
+                    export['e'].append({list_err['name'],list_err['date2'], "DONE"})
 
         else:
-            export['e'].append({list_err['name'],single_date.strftime("%Y-%m-%d"),"ERR"})
+            export['e'].append({list_err['name'],list_err['date2'],"ERR"})
+
     return HttpResponse(export['e'])
 
 def get_hisory_group(request,group):
