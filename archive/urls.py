@@ -10,7 +10,7 @@ urlpatterns = [
     path('incomp/',views.incomp),
     path('incomp_count/',views.incomp_count),
 
-    path('get_hisory_group/<group>/',views.get_hisory_group),
+    path('get_hisory_group/<group>/<start>/<end>',views.get_hisory_group),
     path('history_revamp/<start>/<end>',views.history_revamp),
 
     path('check_all_date/<start>/<end>',views.check_all_date),

@@ -113,17 +113,15 @@ def history_revamp(request,start,end):
 
     return HttpResponse(export['e'])
 
-def get_hisory_group(request,group):
+def get_hisory_group(request,group,start,end):
     
     #has = ['agriculture','coal','oil_gas','metal_ores','other_mines','textiles','wood','paper','printz','pet_products','plastic','elec_computer','basic_metal','metal_products','equipment','electrical','comm_devices','cars','sugar','multidisciplinary','supply_elec_gas','food','drug','chemical','contracting','wholesale','retail','tile','cement','non_metal','hotel','investments','banks','other_financial','transportation','water_transportation','financial','insurance','auxiliary','etf','financing_bonds','estate','engineering','app_computer','information','technical_services','artistic','telecommunication','tanning']    
     #for item in has:
-
         namad = namadtomodel.objects.filter(model=group)
         all_namad_in_group = Archive.objects.filter(group=namad[0].namad)
         for namad_in_group in all_namad_in_group:
-            link = "http://45.82.137.113:8000/api/history/{}/2020,3,24/2020,7,7/{}".format(group,namad_in_group.name)
+            link = "http://45.82.137.113:8000/api/history/{}/{}/{}/{}".format(group,start,end,namad_in_group.name)
             requests.get(link)
-            time.sleep(10)
 
 def detail_day_namads(request,date_namad):
     
