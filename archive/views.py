@@ -30,6 +30,29 @@ from archive.models import information,technical_services,artistic,tanning
 #49
 from archive.models import telecommunication
 
+
+def check_duplicate_data(request,start_time):
+    start_time = start_time.split(',')
+    start_date = date(int(start_time[0]),int(start_time[1]),int(start_time[2]))
+
+    has = ['agriculture','coal','oil_gas','metal_ores','other_mines','textiles','wood','paper','printz','pet_products','plastic','elec_computer','basic_metal','metal_products','equipment','electrical','comm_devices','cars','sugar','multidisciplinary','supply_elec_gas','food','drug','chemical','contracting','wholesale','retail','tile','cement','non_metal','hotel','investments','banks','other_financial','transportation','water_transportation','financial','insurance','auxiliary','etf','financing_bonds','estate','engineering','app_computer','information','technical_services','artistic','telecommunication','tanning']     
+    data = []
+    data2 = []
+    for item in has:
+
+        today = apps.get_model('archive',item).objects.filter(date=start_date.strftime("%Y-%m-%d"))
+        for intodat in today:
+            data.append(intodat.name)
+    
+    for item in has:
+        for name_namad in data:
+            if apps.get_model('archive',item).objects.filter(name=name_namad,date=start_date.strftime("%Y-%m-%d")).count() > 1:
+                sm = apps.get_model('archive',item).objects.filter(name=name_namad,date=start_date.strftime("%Y-%m-%d"))
+                apps.get_model('archive',item).objects.filter(id=sm[1].id).delete()
+                
+                
+    return HttpResponse(data2)
+
 def history_revamp(request,start,end):
 
     export = {'e':[]}
@@ -202,7 +225,7 @@ def incomp_count(request):
 
     for item in has:
         #edit          datetime.date.today()
-        today = apps.get_model('archive',item).objects.filter(date='2020-7-08')
+        today = apps.get_model('archive',item).objects.filter(date=datetime.date.today())
         for intodat in today :
             if(len(intodat.data) > 30 and len(intodat.data) < 330):
                 incom['name'].append({intodat.name})
