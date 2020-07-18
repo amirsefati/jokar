@@ -51,7 +51,7 @@ def check_duplicate_data(request,start_time):
                 apps.get_model('archive',item).objects.filter(id=sm[1].id).delete()
                 
                 
-    return HttpResponse(data2)
+    return HttpResponse("done")
 
 def history_revamp(request,start,end):
 
