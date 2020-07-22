@@ -143,7 +143,7 @@ def get_hisory_group(request,group,start,end):
         namad = namadtomodel.objects.filter(model=group)
         all_namad_in_group = Archive.objects.filter(group=namad[0].namad)
         for namad_in_group in all_namad_in_group:
-            link = "http://45.82.137.113:8000/api/history/{}/{}/{}/{}".format(group,start,end,namad_in_group.name)
+            link = "http://localhost:8000/api/history/{}/{}/{}/{}".format(group,start,end,namad_in_group.name)
             requests.get(link)
 
 def detail_day_namads(request,date_namad):
@@ -396,8 +396,7 @@ def daily_check(request):
 
 def delete(request,group):
     apps.get_model('archive',group).objects.all().delete()
-   
-    
+     
 start_date = ''
 end_date = ''
 
