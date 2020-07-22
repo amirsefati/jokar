@@ -9,6 +9,9 @@ urlpatterns = [
     path('daily_check/',views.daily_check),
     path('incomp/',views.incomp),
     path('incomp_count/',views.incomp_count),
+    #views
+    path('get_daily_namad/',views.get_daily_namad),
+
     
     path('history/<group>/<start_time>/<end_time>/<name>',views.history),
     path('get_hisory_group/<group>/<start>/<end>',views.get_hisory_group),
