@@ -30,6 +30,32 @@ from archive.models import information,technical_services,artistic,tanning
 #49
 from archive.models import telecommunication
 
+
+def revamp_history_view(request):
+    return render(request,'revamp_history_view.html')
+
+def edit_duplicate_history_view(request):
+    return render(request,'edit_duplicate_history_view.html')
+
+def get_history_group(request):
+    nm = namadtomodel.objects.all()
+    return render(request,'get_history_group.html',{"namad_model":nm})
+
+def get_history_namad(request):
+    nm = Archive.objects.all()
+    return render(request,'get_history_namad.html',{"namad":nm})
+
+def get_daily_co(request):
+    import requests
+    import time
+
+    group = ['agriculture','coal','oil_gas','metal_ores','other_mines','textiles','wood','paper','printz','pet_products','plastic','elec_computer','basic_metal','metal_products','equipment','electrical','comm_devices','cars','sugar','multidisciplinary','supply_elec_gas','food','drug','chemical','contracting','wholesale','retail','tile','cement','non_metal','hotel','investments','banks','other_financial','transportation','water_transportation','financial','insurance','auxiliary','etf','financing_bonds','estate','engineering','app_computer','information','technical_services','artistic','telecommunication','tanning']
+
+    for data in group:
+        address = "http://45.82.137.113:8000/api/daily/{}".format(data)
+        requests.get(address)
+        time.sleep(3)
+
 def get_daily_namad(request):
     
     incom = {'name':[]}
@@ -384,7 +410,7 @@ def incomp(request):
             if(len(intodat.data) > 30 and len(intodat.data) < 330):
                 incom['name'].append({intodat.name})
 
-    return HttpResponse(incom['name'])
+    return render(request,'incomp.html',{'incom':incom['name']})
     
 def daily_check(request):
     datain_archive = Archive.objects.all()
@@ -405,7 +431,7 @@ def daily_check(request):
         if arch not in today_list['name']:
             diff.append(arch)
 
-    return HttpResponse( diff)
+    return render(request,'daily_check_namad.html',{"incom":diff})
 
 def delete(request,group):
     apps.get_model('archive',group).objects.all().delete()

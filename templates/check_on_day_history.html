@@ -8,9 +8,16 @@
         <p style="font-size:14px;margin-top:5px">با انتخاب یه تاریخ میتوانید تمام نماد  ها را چک کنید</p>
       </div>
       <div style="margin-top:20px">
-        {{correct}} <br>
-        {{err}} <br>
-        {{all_data}}
+        <p style="text-align:right;font-size:20px"> :  نماد های گرفته شده <p>
+        <div style="color:#00A676">{{correct}}</div> <br>
+        <hr style="border: 0;height: 1px;background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));">
+        <p style="text-align:right;font-size:20px"> :  نماد های  ناقص <p>
+        <div style="color:#F39237">{{err}}</div> <br>
+        <hr style="border: 0;height: 1px;background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));">
+        <p style="text-align:right;font-size:20px"> :  نماد های  گرفته نشده <p>
+        
+        <div style="color:#D63230">{{all_data}}</div> <br>
+
       </div>
 
 

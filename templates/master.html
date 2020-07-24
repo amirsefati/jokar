@@ -6,7 +6,6 @@
         <style>
         body{
             font-family: 'Vazir'!important;
-            direction:rtl !important;
         }
         a{
           text-decoration:none;
@@ -14,6 +13,8 @@
         .topnav {
           background-color: #006D77;
           overflow: hidden;
+          direction:rtl !important;
+
         }
 
         /* Style the links inside the navigation bar */
@@ -125,6 +126,7 @@
             text-align: right;
           }
         }
+                
         </style>
     </head>
 
@@ -148,12 +150,12 @@
               <i class="fa fa-caret-down"></i>
             </button>
             <div class="dropdown-content">
-              <a href="#">گرفتن سابقه یک نماد</a>
-              <a href="#">گرفتن سابقه گروه </a>
-              <a href="#"> تعداد نمادهای گرفته شده ماهانه</a>
-              <a href="#">نمایش جزئیات سابقه</a>
-              <a href="#">اصلاح سابقه</a>
-              <a href="#">اصلاح نماد های تکراری</a>
+              <a href="/api/get_history_namad">گرفتن سابقه یک نماد</a>
+              <a href="/api/get_history_group">گرفتن سابقه گروه </a>
+              <a href="/api/check_all_date/2020,4,30/2020,7,6"> تعداد نمادهای گرفته شده ماهانه</a>
+              <a href="/api/detail_day_namads/2020,7,4">نمایش جزئیات سابقه</a>
+              <a href="/api/revamp_history_view">اصلاح سابقه</a>
+              <a href="/api/edit_duplicate_history_view">اصلاح نماد های تکراری</a>
 
             </div>
           </div>

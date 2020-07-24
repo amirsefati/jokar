@@ -1,0 +1,25 @@
+{% extends 'master.html' %}
+{% block content %}
+
+   <div style="text-align:center">
+        <p style="font-size:22px"> گرفتن سابقه یک گروه </p> 
+    </div>
+    <div style="text-align:center">
+        <p>: انتخاب گروه   </p>
+        <select name="cars" id="cars" style="padding:5px">
+        {% for nm in namad_model%}
+            <option value="{{nm.model}}">{{nm.model}} - {{nm.namad}}</option>  
+        {% endfor %}
+        </select>
+        <br><br>
+        <p style="font-size:13px"> یک بازه برای این نماد انتخاب کنید </p>
+        <input type="date" id="start" name="start">
+        <input type="date" id="end" name="end">
+
+        <br><br><br>
+        <a href="#">
+            <span style="background:#00A676;color:white;border-radius:10px;padding:5px 10px 5px 10px">درخواست</span>
+        </a>
+        
+    </div>
+{% endblock content %}
