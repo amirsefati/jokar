@@ -52,7 +52,7 @@ def get_daily_co(request):
     group = ['agriculture','coal','oil_gas','metal_ores','other_mines','textiles','wood','paper','printz','pet_products','plastic','elec_computer','basic_metal','metal_products','equipment','electrical','comm_devices','cars','sugar','multidisciplinary','supply_elec_gas','food','drug','chemical','contracting','wholesale','retail','tile','cement','non_metal','hotel','investments','banks','other_financial','transportation','water_transportation','financial','insurance','auxiliary','etf','financing_bonds','estate','engineering','app_computer','information','technical_services','artistic','telecommunication','tanning']
 
     for data in group:
-        address = "http://45.82.137.113:8000/api/daily/{}".format(data)
+        address = "http://localhost:8000/api/daily/{}".format(data)
         requests.get(address)
         time.sleep(3)
 
@@ -523,7 +523,6 @@ def history(request,group,start_time,end_time,name):
                         apps.get_model('archive',group).objects.create(name=name,kind=check[0].kind,date=single_date.strftime("%Y-%m-%d"),data='error_history')
 
         return HttpResponse(ddd['d'])
-
 
 def daily(request,group): 
 
