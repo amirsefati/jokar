@@ -52,7 +52,7 @@ def get_daily_co(request):
     group = ['agriculture','coal','oil_gas','metal_ores','other_mines','textiles','wood','paper','printz','pet_products','plastic','elec_computer','basic_metal','metal_products','equipment','electrical','comm_devices','cars','sugar','multidisciplinary','supply_elec_gas','food','drug','chemical','contracting','wholesale','retail','tile','cement','non_metal','hotel','investments','banks','other_financial','transportation','water_transportation','financial','insurance','auxiliary','etf','financing_bonds','estate','engineering','app_computer','information','technical_services','artistic','telecommunication','tanning']
 
     for data in group:
-        address = "http://localhost:8000/api/daily/{}".format(data)
+        address = "http://localhost:8000/data/daily/{}".format(data)
         requests.get(address)
         time.sleep(3)
 
@@ -65,7 +65,7 @@ def get_daily_namad(request):
     for item in has:
         today = apps.get_model('archive',item).objects.filter(date=datetime.date.today())
         for intodat in today :
-            if(len(intodat.data) > 30 and len(intodat.data) < 330):
+            if(len(str(intodat.data)) > 30 and len(str(intodat.data)) < 330):
                 incom['name'].append({intodat.name})
 
     return render(request,'get_daily_data.html',{'count':incom['name']})
@@ -182,7 +182,7 @@ def get_hisory_group(request,group,start,end):
         namad = namadtomodel.objects.filter(model=group)
         all_namad_in_group = Archive.objects.filter(group=namad[0].namad)
         for namad_in_group in all_namad_in_group:
-            link = "http://localhost:8000/api/history/{}/{}/{}/{}".format(group,start,end,namad_in_group.name)
+            link = "http://localhost:8000/data/history/{}/{}/{}/{}".format(group,start,end,namad_in_group.name)
             requests.get(link)
 
 def detail_day_namads(request,date_namad):
@@ -300,15 +300,23 @@ def incomp(request):
                     my_obj['data'].append({'sf' : arr[26].rsplit('=')[1].replace("'","")}) 
 
                 url2 = site[0].api
-                in_api = re.compile("A.*")
 
                 response2 = requests.get(url2)
-                response2 = requests.get(url2)
-
                 plain_api = response2.text
+
+                in_api = re.compile("A.*")
                 data_inapi = in_api.findall(plain_api)
 
-                if(len(str(data_inapi)) > 330):
+                in_api_is = re.compile("IS.*")
+                data_inapi_is = in_api_is.findall(plain_api)
+
+                in_api_as = re.compile("AS.*")
+                data_inapi_as = in_api_as.findall(plain_api)
+
+                in_api_i = re.compile("I.*")
+                data_inapi_i = in_api_i.findall(plain_api)
+
+                if(len(str(data_inapi)) > 180):
                     
                         for data in data_inapi :
                             arr = data.split(',')
@@ -348,17 +356,13 @@ def incomp(request):
                                 my_obj['data'].append({"css":arr[8]}) 
                                 my_obj['data'].append({"csc":arr[9]}) 
                             
-                        we_model = namadtomodel.objects.filter(namad=group)
-                        apply_model = we_model[0].model
-                        #edit
-                        apps.get_model('archive',apply_model).objects.filter(name=intodat.name,date=datetime.date.today()).update(data=my_obj)
-                        
-                else:
-                    in_api = re.compile("IS.*")
-                    data_inapi = in_api.findall(plain_api)
-                    if(len(str(data_inapi)) > 5):
-                        
-                        for data in data_inapi :
+                                we_model = namadtomodel.objects.filter(namad=group)
+                                apply_model = we_model[0].model
+                                apps.get_model('archive',apply_model).objects.filter(name=intodat.name,date=datetime.date.today()).update(data=my_obj)
+   
+                elif((len(str(data_inapi_is)) > 180)):
+                   
+                        for data in data_inapi_is :
                             arr = data.split(',')
                             if(int(arr[7]) > 0):
                                 my_obj['data'].append({"pi":arr[1]}) 
@@ -367,7 +371,7 @@ def incomp(request):
                                 my_obj['data'].append({"vt":arr[8]}) 
                                 my_obj['data'].append({"value_t":arr[9]}) 
 
-                                for data in data_inapi :
+                                for data in data_inapi_is :
                                     arr = data.split(';')
                                     arr = arr[2]
                                     if(len(str(arr)) > 3): 
@@ -379,30 +383,112 @@ def incomp(request):
                                         my_obj['data'].append({"sbp":arr[3]}) 
                                         my_obj['data'].append({"sbv":arr[4]}) 
 
-                                for data in data_inapi :
+                                for data in data_inapi_is :
                                     arr = data.split(';')
                                     arr = arr[4]
-                                    arr = arr.split(',')
-                                    my_obj['data'].append({"vbs":arr[0]}) 
-                                    my_obj['data'].append({"vbc":arr[1]}) 
-                                    my_obj['data'].append({"vss":arr[3]}) 
-                                    my_obj['data'].append({"vsc":arr[4]}) 
+                                    if(len(str(arr)) > 20):
 
-                                    my_obj['data'].append({"cbs":arr[5]}) 
-                                    my_obj['data'].append({"cbc":arr[6]}) 
-                                    my_obj['data'].append({"css":arr[8]}) 
-                                    my_obj['data'].append({"csc":arr[9]}) 
+                                        arr = arr.split(',')
+                                        my_obj['data'].append({"vbs":arr[0]}) 
+                                        my_obj['data'].append({"vbc":arr[1]}) 
+                                        my_obj['data'].append({"vss":arr[3]}) 
+                                        my_obj['data'].append({"vsc":arr[4]}) 
+
+                                        my_obj['data'].append({"cbs":arr[5]}) 
+                                        my_obj['data'].append({"cbc":arr[6]}) 
+                                        my_obj['data'].append({"css":arr[8]}) 
+                                        my_obj['data'].append({"csc":arr[9]}) 
+                            
+                                        we_model = namadtomodel.objects.filter(namad=group)
+                                        apply_model = we_model[0].model
+                                        apps.get_model('archive',apply_model).objects.filter(name=intodat.name,date=datetime.date.today()).update(data=my_obj)
                         
-                                we_model = namadtomodel.objects.filter(namad=group)
-                                apply_model = we_model[0].model
-                                #edit
-                                apps.get_model('archive',apply_model).objects.filter(name=intodat.name,date=datetime.date.today()).update(data=my_obj)
-                
-                            else:
-                                my_obj=['Stopped stock']
-                    else:
-                        my_obj=['IS AND A NOT EXIST !!']
-                
+                elif((len(str(data_inapi_as)) > 180)):
+                   
+                        for data in data_inapi_as :
+                            arr = data.split(',')
+                            if(int(arr[7]) > 0):
+                                my_obj['data'].append({"pi":arr[1]}) 
+                                my_obj['data'].append({"pe":arr[2]}) 
+                                my_obj['data'].append({"ct":arr[7]}) 
+                                my_obj['data'].append({"vt":arr[8]}) 
+                                my_obj['data'].append({"value_t":arr[9]}) 
+
+                                for data in data_inapi_as :
+                                    arr = data.split(';')
+                                    arr = arr[2]
+                                    if(len(str(arr)) > 3): 
+
+                                        arr = arr.split('@')
+                                            
+                                        my_obj['data'].append({"bbv":arr[1]}) 
+                                        my_obj['data'].append({"bbp":arr[2]}) 
+                                        my_obj['data'].append({"sbp":arr[3]}) 
+                                        my_obj['data'].append({"sbv":arr[4]}) 
+
+                                for data in data_inapi_as :
+                                    arr = data.split(';')
+                                    arr = arr[4]
+                                    if(len(str(arr)) > 20):
+
+                                        arr = arr.split(',')
+                                        my_obj['data'].append({"vbs":arr[0]}) 
+                                        my_obj['data'].append({"vbc":arr[1]}) 
+                                        my_obj['data'].append({"vss":arr[3]}) 
+                                        my_obj['data'].append({"vsc":arr[4]}) 
+
+                                        my_obj['data'].append({"cbs":arr[5]}) 
+                                        my_obj['data'].append({"cbc":arr[6]}) 
+                                        my_obj['data'].append({"css":arr[8]}) 
+                                        my_obj['data'].append({"csc":arr[9]}) 
+                            
+                                        we_model = namadtomodel.objects.filter(namad=group)
+                                        apply_model = we_model[0].model
+                                        apps.get_model('archive',apply_model).objects.filter(name=intodat.name,date=datetime.date.today()).update(data=my_obj)
+                        
+                elif((len(str(data_inapi_i))  > 180)):
+                   
+                        for data in data_inapi_i :
+                            arr = data.split(',')
+                            if(int(arr[7]) > 0):
+                                my_obj['data'].append({"pi":arr[1]}) 
+                                my_obj['data'].append({"pe":arr[2]}) 
+                                my_obj['data'].append({"ct":arr[7]}) 
+                                my_obj['data'].append({"vt":arr[8]}) 
+                                my_obj['data'].append({"value_t":arr[9]}) 
+
+                                for data in data_inapi_i :
+                                    arr = data.split(';')
+                                    arr = arr[2]
+                                    if(len(str(arr)) > 3): 
+
+                                        arr = arr.split('@')
+                                            
+                                        my_obj['data'].append({"bbv":arr[1]}) 
+                                        my_obj['data'].append({"bbp":arr[2]}) 
+                                        my_obj['data'].append({"sbp":arr[3]}) 
+                                        my_obj['data'].append({"sbv":arr[4]}) 
+
+                                for data in data_inapi_i :
+                                    arr = data.split(';')
+                                    arr = arr[4]
+                                    if(len(str(arr)) > 5):
+                                        arr = arr.split(',')
+                                        my_obj['data'].append({"vbs":arr[0]}) 
+                                        my_obj['data'].append({"vbc":arr[1]}) 
+                                        my_obj['data'].append({"vss":arr[3]}) 
+                                        my_obj['data'].append({"vsc":arr[4]}) 
+
+                                        my_obj['data'].append({"cbs":arr[5]}) 
+                                        my_obj['data'].append({"cbc":arr[6]}) 
+                                        my_obj['data'].append({"css":arr[8]}) 
+                                        my_obj['data'].append({"csc":arr[9]}) 
+                                    
+                                        we_model = namadtomodel.objects.filter(namad=group)
+                                        apply_model = we_model[0].model
+                                        apps.get_model('archive',apply_model).objects.filter(name=intodat.name,date=datetime.date.today()).update(data=my_obj)
+                        
+
     for item in has:
         #edit
         today = apps.get_model('archive',item).objects.filter(date=datetime.date.today())
@@ -795,10 +881,20 @@ def daily(request,group):
             url2 = address.api
             response2 = requests.get(url2)
             plain_api = response2.text
+
             in_api = re.compile("A.*")
             data_inapi = in_api.findall(plain_api)
-                    
-            if(len(str(data_inapi)) > 20):
+
+            in_api_is = re.compile("IS.*")
+            data_inapi_is = in_api_is.findall(plain_api)
+
+            in_api_i = re.compile("I.*")
+            data_inapi_i = in_api_i.findall(plain_api)
+
+            in_api_as = re.compile("AS.*")
+            data_inapi_as = in_api_as.findall(plain_api)
+
+            if(len(str(data_inapi)) > 300):
                 for data in data_inapi :
                     arr = data.split(',')
                     my_obj['data'].append({"pi":arr[1]}) 
@@ -811,7 +907,6 @@ def daily(request,group):
                         nav = arr[14].split(';') 
                         my_obj['data'].append({"nav":nav[0]}) 
                 
-                #new
                 for data in data_inapi :
                     arr = data.split(';')
                     arr = arr[2]
@@ -823,7 +918,6 @@ def daily(request,group):
                         my_obj['data'].append({"bbp":arr[2]}) 
                         my_obj['data'].append({"sbp":arr[3]}) 
                         my_obj['data'].append({"sbv":arr[4]}) 
-
                        
                 for data in data_inapi :
                     arr = data.split(';')
@@ -841,13 +935,11 @@ def daily(request,group):
                         my_obj['data'].append({"cbc":arr[6]}) 
                         my_obj['data'].append({"css":arr[8]}) 
                         my_obj['data'].append({"csc":arr[9]}) 
-                                    
-            else:
+                     
+            elif(len(str(data_inapi_is)) > 300):
                 in_api = re.compile("IS.*")
                 data_inapi = in_api.findall(plain_api)
-                if(len(str(data_inapi)) > 5):
-                    
-                    for data in data_inapi :
+                for data in data_inapi :
                         arr = data.split(',')
                         if(int(arr[7]) > 0):
                             my_obj['data'].append({"pi":arr[1]}) 
@@ -872,21 +964,117 @@ def daily(request,group):
                             for data in data_inapi :
                                 arr = data.split(';')
                                 arr = arr[4]
-                                arr = arr.split(',')
-                                my_obj['data'].append({"vbs":arr[0]}) 
-                                my_obj['data'].append({"vbc":arr[1]}) 
-                                my_obj['data'].append({"vss":arr[3]}) 
-                                my_obj['data'].append({"vsc":arr[4]}) 
+                                if(len(str(arr)) > 5):
 
-                                my_obj['data'].append({"cbs":arr[5]}) 
-                                my_obj['data'].append({"cbc":arr[6]}) 
-                                my_obj['data'].append({"css":arr[8]}) 
-                                my_obj['data'].append({"csc":arr[9]}) 
-                            
+                                    arr = arr.split(',')
+                                    my_obj['data'].append({"vbs":arr[0]}) 
+                                    my_obj['data'].append({"vbc":arr[1]}) 
+                                    my_obj['data'].append({"vss":arr[3]}) 
+                                    my_obj['data'].append({"vsc":arr[4]}) 
+
+                                    my_obj['data'].append({"cbs":arr[5]}) 
+                                    my_obj['data'].append({"cbc":arr[6]}) 
+                                    my_obj['data'].append({"css":arr[8]}) 
+                                    my_obj['data'].append({"csc":arr[9]}) 
+                                else:
+                                    my_obj=['this_stock_need_incomp_update_retry']
                         else:
                             my_obj=['Stopped stock']
-                else:
-                    my_obj=['IS AND A NOT EXIST !!']
+
+            elif(len(str(data_inapi_i)) > 300):
+                in_api = re.compile("I.*")
+                data_inapi = in_api.findall(plain_api)
+                for data in data_inapi :
+                        arr = data.split(',')
+                        if(int(arr[7]) > 0):
+                            my_obj['data'].append({"pi":arr[1]}) 
+                            my_obj['data'].append({"pe":arr[2]}) 
+                            my_obj['data'].append({"ct":arr[7]}) 
+                            my_obj['data'].append({"vt":arr[8]}) 
+                            my_obj['data'].append({"value_t":arr[9]}) 
+
+                            for data in data_inapi :
+                                arr = data.split(';')
+                                arr = arr[2]
+                                if(len(str(arr)) > 3): 
+
+                                    arr = arr.split('@')
+                                    
+                                    my_obj['data'].append({"bbv":arr[1]}) 
+                                    my_obj['data'].append({"bbp":arr[2]}) 
+                                    my_obj['data'].append({"sbp":arr[3]}) 
+                                    my_obj['data'].append({"sbv":arr[4]}) 
+
+
+                            for data in data_inapi :
+                                arr = data.split(';')
+                                arr = arr[3]
+                                if(len(str(arr)) > 5):
+                                    arr = arr.split(',')
+                                    my_obj['data'].append({"vbs":arr[0]}) 
+                                    my_obj['data'].append({"vbc":arr[1]}) 
+                                    my_obj['data'].append({"vss":arr[3]}) 
+                                    my_obj['data'].append({"vsc":arr[4]}) 
+
+                                    my_obj['data'].append({"cbs":arr[5]}) 
+                                    my_obj['data'].append({"cbc":arr[6]}) 
+                                    my_obj['data'].append({"css":arr[8]}) 
+                                    my_obj['data'].append({"csc":arr[9]}) 
+                                else:
+                                    my_obj=['this_stock_need_incomp_update_retry']
+                        else:
+                            my_obj=['Stopped stock']
+
+            elif(len(str(data_inapi_as)) > 300):
+                in_api = re.compile("AS.*")
+                data_inapi = in_api.findall(plain_api)
+                for data in data_inapi :
+                        arr = data.split(',')
+                        if(int(arr[7]) > 0):
+                            my_obj['data'].append({"pi":arr[1]}) 
+                            my_obj['data'].append({"pe":arr[2]}) 
+                            my_obj['data'].append({"ct":arr[7]}) 
+                            my_obj['data'].append({"vt":arr[8]}) 
+                            my_obj['data'].append({"value_t":arr[9]}) 
+
+                            for data in data_inapi :
+                                arr = data.split(';')
+                                arr = arr[2]
+                                if(len(str(arr)) > 3): 
+
+                                    arr = arr.split('@')
+                                    
+                                    my_obj['data'].append({"bbv":arr[1]}) 
+                                    my_obj['data'].append({"bbp":arr[2]}) 
+                                    my_obj['data'].append({"sbp":arr[3]}) 
+                                    my_obj['data'].append({"sbv":arr[4]}) 
+
+
+                            for data in data_inapi :
+                                arr = data.split(';')
+                                arr = arr[4]
+                                if(len(str(arr)) > 5):
+
+                                    arr = arr.split(',')
+                                    my_obj['data'].append({"vbs":arr[0]}) 
+                                    my_obj['data'].append({"vbc":arr[1]}) 
+                                    my_obj['data'].append({"vss":arr[3]}) 
+                                    my_obj['data'].append({"vsc":arr[4]}) 
+
+                                    my_obj['data'].append({"cbs":arr[5]}) 
+                                    my_obj['data'].append({"cbc":arr[6]}) 
+                                    my_obj['data'].append({"css":arr[8]}) 
+                                    my_obj['data'].append({"csc":arr[9]}) 
+                                else:
+                                    my_obj=['this_stock_need_incomp_update_retry']
+                                    
+                        else:
+                            my_obj=['Stopped stock']
+
+            else:
+                my_obj=['Stock_has_error_pass_to_incomp_function']
+    
+
 
             #1-4
             if(group == 'agriculture'):    
