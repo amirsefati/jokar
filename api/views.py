@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse,HttpResponse
 from django.apps import apps
-from datetime import date,timedelta
+from datetime import date,timedelta,datetime
 from dateutil.relativedelta import relativedelta
 
 # Create your views here.
@@ -14,8 +14,7 @@ def pl1(request,date_time):
     past_week = date.today() + relativedelta(days=-7)
     week = {'day':[]}
     for n in range((date.today() - past_week).days):
-        week['day'].append(past_week + timedelta(n))
-
+        week['day'].append(date.today() - timedelta(n))
     week_calculate = {}
 
     for item in has:
@@ -23,7 +22,7 @@ def pl1(request,date_time):
             data = (apps.get_model('archive',item).objects.filter(date=day_in_week.strftime("%Y-%m-%d")))
             for da in data:
                 dta = {}
-                if(len(str(da.data)) > 290):
+                if(len(str(da.data)) > 350):
                     dc = da.data.split("[")
                     dc = dc[1].replace("]}","")
                     dc = dc.split(",")
@@ -32,12 +31,12 @@ def pl1(request,date_time):
                         db = db.replace("}","")
                         db = db.split(":")
                         dta.__setitem__(db[0],db[1])                 
-                    pe = dta[" 'value_t'"]
-                    pi = dta[" 'vt'"]
+                    value_t = dta[" 'value_t'"]
+                    vt = dta[" 'vt'"]
                     vbs = dta[" 'vbs'"]
                     vss = dta[" 'vss'"]
-                    if((int(pi.replace("'",""))) > 0):
-                        calculate_d = ((((int(pe.replace("'","")))/(int(pi.replace("'",""))))/10)*(int(vbs.replace("'",""))-int(vss.replace("'",""))))/1000000000
+                    if((int(vt.replace("'",""))) > 0):
+                        calculate_d = ((((int(value_t.replace("'","")))/(int(vt.replace("'",""))))/10)*(int(vbs.replace("'",""))-int(vss.replace("'",""))))/1000000000
                         if da.name in week_calculate:
                             new_data = week_calculate[da.name]
                             new_calculate = calculate_d + new_data
@@ -51,7 +50,7 @@ def pl1(request,date_time):
             data = (apps.get_model('archive',item).objects.filter(date=date_time))
             for da in data:  
                 dta = {}
-                if(len(str(da.data)) > 290):
+                if(len(str(da.data)) > 350):
                     dc = da.data.split("[")
                     dc = dc[1].replace("]}","")
                     dc = dc.split(",")
@@ -60,13 +59,18 @@ def pl1(request,date_time):
                         db = db.replace("}","")
                         db = db.split(":")
                         dta.__setitem__(db[0],db[1])
-                    pe = dta[" 'value_t'"]
-                    pi = dta[" 'vt'"]
+                    value_t = dta[" 'value_t'"]
+                    vt = dta[" 'vt'"]
                     vbs = dta[" 'vbs'"]
                     vss = dta[" 'vss'"]
-                    if((int(pi.replace("'",""))) > 0):
+                    if((int(vt.replace("'",""))) > 0):
+                        calculate_d = ((((int(value_t.replace("'","")))/(int(vt.replace("'",""))))/10)*(int(vbs.replace("'",""))-int(vss.replace("'",""))))/1000000000
 
-                        calculate_d = ((((int(pe.replace("'","")))/(int(pi.replace("'",""))))/10)*(int(vbs.replace("'",""))-int(vss.replace("'",""))))/1000000000
+                        if da.name in week_calculate:
+                            print('')
+                        else:
+                            week_calculate.__setitem__(da.name,calculate_d)
+
                         all_data.append({"n":da.name,"g":item,"d":calculate_d,"w":week_calculate[da.name]})
   
     return JsonResponse(all_data,safe=False)
