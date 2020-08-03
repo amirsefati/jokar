@@ -996,7 +996,7 @@ def daily(request,group):
                             for data in data_inapi :
                                 arr = data.split(';')
                                 arr = arr[4]
-                                if(len(str(arr)) > 5):
+                                if(len(str(arr)) > 15):
 
                                     arr = arr.split(',')
                                     my_obj['data'].append({"vbs":arr[0]}) 
@@ -1041,7 +1041,7 @@ def daily(request,group):
                             for data in data_inapi :
                                 arr = data.split(';')
                                 arr = arr[3]
-                                if(len(str(arr)) > 5):
+                                if(len(str(arr)) > 20):
                                     arr = arr.split(',')
                                     my_obj['data'].append({"vbs":arr[0]}) 
                                     my_obj['data'].append({"vbc":arr[1]}) 
