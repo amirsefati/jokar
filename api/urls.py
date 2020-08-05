@@ -3,6 +3,6 @@ from . import views
 
 
 urlpatterns = [
-    path('daily_individual_cash_inflows/<date_time>',views.pl1)
+    path('daily_individual_cash_inflows',views.pl1)
 ]
     
