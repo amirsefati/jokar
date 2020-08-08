@@ -52,7 +52,7 @@ def get_daily_co(request):
     group = ['agriculture','coal','oil_gas','metal_ores','other_mines','textiles','wood','paper','printz','pet_products','plastic','elec_computer','basic_metal','metal_products','equipment','electrical','comm_devices','cars','sugar','multidisciplinary','supply_elec_gas','food','drug','chemical','contracting','wholesale','retail','tile','cement','non_metal','hotel','investments','banks','other_financial','transportation','water_transportation','financial','insurance','auxiliary','etf','financing_bonds','estate','engineering','app_computer','information','technical_services','artistic','telecommunication','tanning']
 
     for data in group:
-        address = "http://localhost:8000/data/daily/{}".format(data)
+        address = "http://45.82.137.113:8000/data/daily/{}".format(data)
         requests.get(address)
         time.sleep(3)
 
@@ -182,7 +182,7 @@ def get_hisory_group(request,group,start,end):
         namad = namadtomodel.objects.filter(model=group)
         all_namad_in_group = Archive.objects.filter(group=namad[0].namad)
         for namad_in_group in all_namad_in_group:
-            link = "http://localhost:8000/data/history/{}/{}/{}/{}".format(group,start,end,namad_in_group.name)
+            link = "http://45.82.137.113:8000/data/history/{}/{}/{}/{}".format(group,start,end,namad_in_group.name)
             requests.get(link)
 
 def detail_day_namads(request,date_namad):
