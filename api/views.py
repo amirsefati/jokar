@@ -90,16 +90,16 @@ def pl2(request):
 
     all_data = []
 
-    past_week = date.today() + relativedelta(days=-15)
+    past_week = date.today() + relativedelta(days=-10)
     week = {'day':[]}
     for n in range((date.today() - past_week).days):
         week['day'].append(date.today() - timedelta(n))
     
     cumulative_month = []
-    
+
     for day_in_week in week['day']:
         cumulative_day = 0
-        for item in has:
+        for item in has:    
             data = (apps.get_model('archive',item).objects.filter(date=day_in_week.strftime("%Y-%m-%d")))
             for da in data:
                 dta = {}
@@ -124,7 +124,7 @@ def pl2(request):
                         calculate_d = ((((int(value_t.replace("'","")))/(int(vt.replace("'",""))))/10)*(int(vbs.replace("'",""))-int(vss.replace("'",""))))/1000000000
                         calculate_d = round(calculate_d,4)
                         cumulative_day = cumulative_day + calculate_d
-        if(cumulative_day > 0):
+        if(cumulative_day != 0):
             cumulative_month.append({"d":day_in_week.strftime("%Y-%m-%d"),"c":cumulative_day})
 
     return JsonResponse(cumulative_month,safe=False)
