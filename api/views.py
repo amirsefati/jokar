@@ -22,9 +22,9 @@ def pl1(request):
             data = (apps.get_model('archive',item).objects.filter(date=day_in_week.strftime("%Y-%m-%d")))
             for da in data:
                 dta = {}
-                if(len(str(da.data)) > 350):
-                    dc = da.data.split("[")
-                    dc = dc[1].replace("]}","")
+                if(len(str(da.data)) > 230):
+                    dc = da.data.split(": [")
+                    dc = dc[1].replace("}]}","")
                     dc = dc.split(",")
                     for db in dc:
                         db = db.replace("{","")
@@ -33,8 +33,12 @@ def pl1(request):
                         dta.__setitem__(db[0],db[1])                 
                     value_t = dta[" 'value_t'"]
                     vt = dta[" 'vt'"]
-                    vbs = dta[" 'vbs'"]
-                    vss = dta[" 'vss'"]
+                    if(len(str(da.data)) > 290):
+                        vbs = dta[" 'vbs'"]
+                        vss = dta[" 'vss'"]
+                    else:
+                        vbs = dta["'vbs'"]
+                        vss = dta[" 'vss'"]
                     if((int(vt.replace("'",""))) > 0):
                         calculate_d = ((((int(value_t.replace("'","")))/(int(vt.replace("'",""))))/10)*(int(vbs.replace("'",""))-int(vss.replace("'",""))))/1000000000
                         calculate_d = round(calculate_d,4)
@@ -50,8 +54,8 @@ def pl1(request):
             data = (apps.get_model('archive',item).objects.filter(date=date.today().strftime("%Y-%m-%d")))
             for da in data:  
                 dta = {}
-                if(len(str(da.data)) > 350):
-                    dc = da.data.split("[")
+                if(len(str(da.data)) > 230):
+                    dc = da.data.split(": [")
                     dc = dc[1].replace("]}","")
                     dc = dc.split(",")
                     for db in dc:
@@ -61,8 +65,12 @@ def pl1(request):
                         dta.__setitem__(db[0],db[1])
                     value_t = dta[" 'value_t'"]
                     vt = dta[" 'vt'"]
-                    vbs = dta[" 'vbs'"]
-                    vss = dta[" 'vss'"]
+                    if(len(str(da.data)) > 290):
+                        vbs = dta[" 'vbs'"]
+                        vss = dta[" 'vss'"]
+                    else:
+                        vbs = dta["'vbs'"]
+                        vss = dta[" 'vss'"]
                     if((int(vt.replace("'",""))) > 0):
                         calculate_d = ((((int(value_t.replace("'","")))/(int(vt.replace("'",""))))/10)*(int(vbs.replace("'",""))-int(vss.replace("'",""))))/1000000000
                         calculate_d = round(calculate_d,4)
@@ -77,3 +85,46 @@ def pl1(request):
   
     return JsonResponse(all_data,safe=False)
 
+
+def pl2(request):
+
+    all_data = []
+
+    past_week = date.today() + relativedelta(days=-15)
+    week = {'day':[]}
+    for n in range((date.today() - past_week).days):
+        week['day'].append(date.today() - timedelta(n))
+    
+    cumulative_month = []
+    
+    for day_in_week in week['day']:
+        cumulative_day = 0
+        for item in has:
+            data = (apps.get_model('archive',item).objects.filter(date=day_in_week.strftime("%Y-%m-%d")))
+            for da in data:
+                dta = {}
+                if(len(str(da.data)) > 210):
+                    dc = da.data.split(": [")
+                    dc = dc[1].replace("]}","")
+                    dc = dc.split(",")
+                    for db in dc:
+                        db = db.replace("{","")
+                        db = db.replace("}","")
+                        db = db.split(":")
+                        dta.__setitem__(db[0],db[1])                 
+                    value_t = dta[" 'value_t'"]
+                    vt = dta[" 'vt'"]
+                    if(len(str(da.data)) > 290):
+                        vbs = dta[" 'vbs'"]
+                        vss = dta[" 'vss'"]
+                    else:
+                        vbs = dta["'vbs'"]
+                        vss = dta[" 'vss'"]
+                    if((int(vt.replace("'",""))) > 0):
+                        calculate_d = ((((int(value_t.replace("'","")))/(int(vt.replace("'",""))))/10)*(int(vbs.replace("'",""))-int(vss.replace("'",""))))/1000000000
+                        calculate_d = round(calculate_d,4)
+                        cumulative_day = cumulative_day + calculate_d
+        if(cumulative_day > 0):
+            cumulative_month.append({"d":day_in_week.strftime("%Y-%m-%d"),"c":cumulative_day})
+
+    return JsonResponse(cumulative_month,safe=False)

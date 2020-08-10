@@ -264,9 +264,9 @@ def incomp_count(request):
 
     for item in has:
         #edit          datetime.date.today()
-        today = apps.get_model('archive',item).objects.filter(date=datetime.date.today())
+        today = apps.get_model('archive',item).objects.filter(date='2020-07-27')
         for intodat in today :
-            if(len(intodat.data) > 30 and len(intodat.data) < 330):
+            if(len(intodat.data) > 5 and len(intodat.data) < 210):
                 incom['name'].append({intodat.name})
 
     return render(request,'daily_icomp_all.html',{'inc':incom['name']}) 
