@@ -96,7 +96,7 @@ def pl2(request):
         week['day'].append(date.today() - timedelta(n))
     
     cumulative_month = []
-
+    c_a = 0
     for day_in_week in week['day']:
         cumulative_day = 0
         for item in has:    
@@ -125,6 +125,12 @@ def pl2(request):
                         calculate_d = round(calculate_d,4)
                         cumulative_day = cumulative_day + calculate_d
         if(cumulative_day != 0):
-            cumulative_month.append({"d":day_in_week.strftime("%Y-%m-%d"),"c":cumulative_day})
+            c_a = c_a + cumulative_day
+            cumulative_month.append([day_in_week.strftime("%Y-%m-%d"),cumulative_day,c_a])
+
 
     return JsonResponse(cumulative_month,safe=False)
+
+
+def pl3(request):
+    return JsonResponse('a')

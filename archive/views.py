@@ -112,7 +112,7 @@ def history_revamp(request,start,end):
         for item in has:
             err_list = (apps.get_model('archive',item).objects.filter(date=single_date.strftime("%Y-%m-%d")))
             for item in err_list:
-                if(len(str(item.data)) < 60):
+                if(len(str(item.data)) < 90):
                     incom['db'].append({"name":item.name,"date":single_date.strftime("%Y%m%d"),"date2":single_date.strftime("%Y-%m-%d")})
 
     for list_err in incom['db']:
@@ -120,59 +120,61 @@ def history_revamp(request,start,end):
         name = list_err['name']
         url2 = check[0].history
         link = "{}{}".format(url2,list_err['date'])
-
         group_t1 = namadtomodel.objects.filter(namad=check[0].group)
         group = group_t1[0].model
 
         response = requests.get(link)
-        data = response.text
+        data_d = response.text
 
         hiderow = re.compile("var\s+ClientTypeData=(.*)")
-        hidden = hiderow.findall(data)
+        hidden = hiderow.findall(data_d)
 
         end = re.compile("var\s+ClosingPriceData=(.*)")
-        endprice = end.findall(data)
+        endprice = end.findall(data_d)
                     
         my_obj = {'data':[]}
 
-        if(len(str(hidden)) > 100 and len(str(endprice)) > 100):   
-             
-            p = re.compile("var\s+ClientTypeData=(.*)")
-            b = p.findall(data) 
-            for item in b :
-                item2 = item.split(',')
-                my_obj['data'].append({'vbs' : item2[4]}) 
-                my_obj['data'].append({'vbc' : item2[5]}) 
-                my_obj['data'].append({'vss' : item2[6]}) 
-                my_obj['data'].append({'vsc' : item2[7]}) 
-                my_obj['data'].append({'cbs' : item2[0]}) 
-                my_obj['data'].append({'cbc' : item2[1]}) 
-                my_obj['data'].append({'css' : item2[2]}) 
-                my_obj['data'].append({'csc' : item2[3]}) 
-                        
-                        #Get End Price
-                end = re.compile("var\s+ClosingPriceData=(.*)")
-                endprice = end.findall(data)
+        if(len(str(hidden)) > 50):
+            if(len(str(endprice)) > 50):  
+                p = re.compile("var\s+ClientTypeData=(.*)")
+                b = p.findall(data_d) 
+                for item in b :
+                    item2 = item.split(',')
+                    my_obj['data'].append({'vbs' : item2[4]}) 
+                    my_obj['data'].append({'vbc' : item2[5]}) 
+                    my_obj['data'].append({'vss' : item2[6]}) 
+                    my_obj['data'].append({'vsc' : item2[7]}) 
+                    my_obj['data'].append({'cbs' : item2[0]}) 
+                    my_obj['data'].append({'cbc' : item2[1]}) 
+                    my_obj['data'].append({'css' : item2[2]}) 
+                    my_obj['data'].append({'csc' : item2[3]}) 
+                            
+                            #Get End Price
+                    end = re.compile("var\s+ClosingPriceData=(.*)")
+                    endprice = end.findall(data_d)
 
-                for item in endprice :
-                    item5 = item.replace('[[','[')
-                    item6 = item5.replace(']]',']')
-                    item7 = item6.split('],[')
-                    item8 = item7[-1]
-                    item9 = item8.replace("'","")
-                    item10 = item9.split(',')
-                    my_obj['data'].append({'pi' : item10[2]}) 
-                    my_obj['data'].append({'pe' : item10[3]}) 
-                    my_obj['data'].append({'ct' : item10[8]}) 
-                    my_obj['data'].append({'vt' : item10[9]}) 
-                    my_obj['data'].append({'value_t' : item10[10]}) 
+                    for item in endprice :
+                        item5 = item.replace('[[','[')
+                        item6 = item5.replace(']]',']')
+                        item7 = item6.split('],[')
+                        item8 = item7[-1]
+                        item9 = item8.replace("'","")
+                        item10 = item9.split(',')
+                        my_obj['data'].append({'pi' : item10[2]}) 
+                        my_obj['data'].append({'pe' : item10[3]}) 
+                        my_obj['data'].append({'ct' : item10[8]}) 
+                        my_obj['data'].append({'vt' : item10[9]}) 
+                        my_obj['data'].append({'value_t' : item10[10]}) 
 
-                    apps.get_model('archive',group).objects.filter(name=name,date=list_err['date2']).update(data=my_obj)
-                    export['e'].append({list_err['name'],list_err['date2'], "DONE"})
+                        apps.get_model('archive',group).objects.filter(name=name,date=list_err['date2']).update(data=my_obj)
+                        export['e'].append({list_err['name'],list_err['date2'], "DONE"})
 
+            else:
+                export['e'].append({list_err['name'],list_err['date2'],"ERR"})
         else:
             export['e'].append({list_err['name'],list_err['date2'],"ERR"})
 
+        time.sleep(1)   
     return HttpResponse(export['e'])
 
 def get_hisory_group(request,group,start,end):
