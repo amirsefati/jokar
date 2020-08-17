@@ -91,11 +91,11 @@ def pl1(request):
 def pl2(request):
 
     all_data = []
+    past_week = date(2020, 7, 12)
 
-    past_week = date.today() + relativedelta(days=-10)
     week = {'day':[]}
     for n in range((date.today() - past_week).days):
-        week['day'].append(date.today() - timedelta(n))
+        week['day'].append(past_week + timedelta(n))
     
     cumulative_month = []
     c_a = 0
@@ -116,16 +116,17 @@ def pl2(request):
                         dta.__setitem__(db[0],db[1])                 
                     value_t = dta[" 'value_t'"]
                     vt = dta[" 'vt'"]
-                    if(len(str(da.data)) > 290):
-                        vbs = dta[" 'vbs'"]
-                        vss = dta[" 'vss'"]
-                    else:
-                        vbs = dta["'vbs'"]
-                        vss = dta[" 'vss'"]
-                    if((int(vt.replace("'",""))) > 0):
-                        calculate_d = ((((int(value_t.replace("'","")))/(int(vt.replace("'",""))))/10)*(int(vbs.replace("'",""))-int(vss.replace("'",""))))/1000000000
-                        calculate_d = round(calculate_d,4)
-                        cumulative_day = cumulative_day + calculate_d
+                    if(int(vt.replace("'","")) > 0):
+                        if(len(str(da.data)) > 290):
+                            vbs = dta[" 'vbs'"]
+                            vss = dta[" 'vss'"]
+                        else:
+                            vbs = dta["'vbs'"]
+                            vss = dta[" 'vss'"]
+                        if((int(vt.replace("'",""))) > 0):
+                            calculate_d = ((((int(value_t.replace("'","")))/(int(vt.replace("'",""))))/10)*(int(vbs.replace("'",""))-int(vss.replace("'",""))))/1000000000
+                            calculate_d = round(calculate_d,4)
+                            cumulative_day = cumulative_day + calculate_d
         if(cumulative_day != 0):
             c_a = c_a + cumulative_day
             
