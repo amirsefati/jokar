@@ -4,6 +4,8 @@ from django.apps import apps
 from datetime import date,timedelta,datetime
 from dateutil.relativedelta import relativedelta
 from archive.models import namadtomodel
+from datetime import timezone
+
 # Create your views here.
 
 has = ['agriculture','coal','oil_gas','metal_ores','other_mines','textiles','wood','paper','printz','pet_products','plastic','elec_computer','basic_metal','metal_products','equipment','electrical','comm_devices','cars','sugar','multidisciplinary','supply_elec_gas','food','drug','chemical','contracting','wholesale','retail','tile','cement','non_metal','hotel','investments','banks','other_financial','transportation','water_transportation','financial','insurance','auxiliary','etf','financing_bonds','estate','engineering','app_computer','information','technical_services','artistic','telecommunication','tanning']    
@@ -126,11 +128,13 @@ def pl2(request):
                         cumulative_day = cumulative_day + calculate_d
         if(cumulative_day != 0):
             c_a = c_a + cumulative_day
+            
             cumulative_month.append([day_in_week.strftime("%Y-%m-%d"),cumulative_day,c_a])
-
 
     return JsonResponse(cumulative_month,safe=False)
 
 
 def pl3(request):
-    return JsonResponse('a')
+    utc_time = datetime(2019,5,20)
+    utc_date = utc_time.replace(tzinfo=timezone.utc).timestamp()
+    return JsonResponse(utc_date,safe=False)
