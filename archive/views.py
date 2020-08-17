@@ -6,8 +6,9 @@ import datetime,time
 import json
 from django.apps import apps
 from datetime import timedelta,date
+from dateutil.relativedelta import relativedelta
 
-from archive.models import Archive,namadtomodel,active_date
+from archive.models import Archive,namadtomodel,active_date,initial_public_offering
 
 #4-16
 from archive.models import agriculture,coal,oil_gas,metal_ores
@@ -30,7 +31,39 @@ from archive.models import information,technical_services,artistic,tanning
 #49
 from archive.models import telecommunication
 
+has = ['agriculture','coal','oil_gas','metal_ores','other_mines','textiles','wood','paper','printz','pet_products','plastic','elec_computer','basic_metal','metal_products','equipment','electrical','comm_devices','cars','sugar','multidisciplinary','supply_elec_gas','food','drug','chemical','contracting','wholesale','retail','tile','cement','non_metal','hotel','investments','banks','other_financial','transportation','water_transportation','financial','insurance','auxiliary','etf','financing_bonds','estate','engineering','app_computer','information','technical_services','artistic','telecommunication','tanning']    
 
+def edit_namad_new(request,date_start):
+    all_data = []
+    str_date = date_start
+    st_d = str_date.split(',')
+    past_week = datetime.date(int(st_d[0]),int(st_d[1]),int(st_d[2])) + relativedelta(days=-30)
+    week = {'day':[]}
+    for n in range((datetime.date(int(st_d[0]),int(st_d[1]),int(st_d[2])) - past_week).days):
+        week['day'].append(datetime.date(int(st_d[0]),int(st_d[1]),int(st_d[2])) - timedelta(n))
+    week_calculate = {}
+
+    for item in has:
+        for day_in_week in week['day']:
+            data = (apps.get_model('archive',item).objects.filter(date=day_in_week.strftime("%Y-%m-%d")))
+            for da in data:
+                dta = {}
+                if(len(str(da.data)) > 230):
+                    dc = da.data.split(": [")
+                    dc = dc[1].replace("}]}","")
+                    dc = dc.split(",")
+                    for db in dc:
+                        db = db.replace("{","")
+                        db = db.replace("}","")
+                        db = db.split(":")
+                        dta.__setitem__(db[0],db[1])                 
+                    pe = dta[" 'pe'"]
+                    vt = dta[" 'vt'"]
+                    
+                    if((int(vt.replace("'",""))) == 0):
+                        if((int(pe.replace("'",""))) == 1000):
+                            return HttpResponse([da.name])
+                    
 def revamp_history_view(request):
     return render(request,'revamp_history_view.html')
 

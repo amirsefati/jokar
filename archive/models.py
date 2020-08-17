@@ -18,6 +18,9 @@ class active_date(models.Model):
     jalali = models.CharField(max_length=250)
     miladi = models.CharField(max_length=100)
 
+class initial_public_offering(models.Model):
+    namad = models.CharField(max_length=250)
+
 #1-4
 class agriculture(models.Model):
     name  = models.CharField(max_length=100)

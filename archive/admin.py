@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 
-from .models import Archive,namadtomodel,active_date
+from .models import Archive,namadtomodel,active_date,initial_public_offering
 
 #1-16
 from .models import agriculture,coal,oil_gas,metal_ores
@@ -29,6 +29,8 @@ admin.site.register(Archive)
 admin.site.register(namadtomodel)
 
 admin.site.register(active_date)
+
+admin.site.register(initial_public_offering)
 
 
 #1-4

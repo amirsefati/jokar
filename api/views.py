@@ -12,7 +12,7 @@ has = ['agriculture','coal','oil_gas','metal_ores','other_mines','textiles','woo
    
 def pl1(request):
     all_data = []
-    
+   
     past_week = date.today() + relativedelta(days=-7)
     week = {'day':[]}
     for n in range((date.today() - past_week).days):

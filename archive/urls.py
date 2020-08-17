@@ -21,10 +21,13 @@ urlpatterns = [
     path('check_all_date/<start>/<end>',views.check_all_date),
     path('detail_day_namads/<date_namad>',views.detail_day_namads),
     
+    path('edit_namad_new/<date_start>',views.edit_namad_new),
+
     #views
     path('get_history_namad',views.get_history_namad),
     path('get_history_group',views.get_history_group),
     path('revamp_history_view',views.revamp_history_view),
     path('edit_duplicate_history_view',views.edit_duplicate_history_view),
+
 
 ] 
