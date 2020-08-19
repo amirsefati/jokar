@@ -9,6 +9,7 @@ class Archive(models.Model):
     url   = models.CharField(max_length=250)
     api   = models.CharField(max_length=250)
     history = models.CharField(max_length=250)
+    sf = models.CharField(max_length=250)
 
 class namadtomodel(models.Model):
     namad = models.CharField(max_length=250)
