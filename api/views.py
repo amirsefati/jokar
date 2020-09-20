@@ -12,7 +12,7 @@ def plugina(request):
     all_data = []
 
     #دیتای 22 روز اخیر  
-    past_22 = date.today() + relativedelta(days=-22)
+    past_22 = date.today() + relativedelta(days=-23)
     day_22 = {'day':[]}
     for n in range((date.today() - past_22).days):
         day_22['day'].append(date.today() - timedelta(n))
@@ -59,7 +59,21 @@ def plugina(request):
                             arr = []
                             arr.append(calculate_d)
                             data_22.__setitem__(da.name,arr)
-
+                else:
+                    if da.name in data_22:
+                            
+                        arr_2 = []
+                        new_data = data_22[da.name]
+                        for pre_data in new_data:
+                            arr_2.append(pre_data)
+                            
+                        arr_2.append('c')
+                            
+                        data_22.__setitem__(da.name,arr_2)
+                    else:
+                        arr = []
+                        arr.append('c')
+                        data_22.__setitem__(da.name,arr)
     #جمع ماهانه دیتای هر نماد 
     past_month = date.today() + relativedelta(days=-20)
     month = {'day':[]}
