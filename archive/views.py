@@ -207,7 +207,7 @@ def history_revamp(request,start,end):
         else:
             export['e'].append({list_err['name'],list_err['date2'],"ERR"})
 
-        time.sleep(1)   
+          
     return HttpResponse(export['e'])
 
 def get_hisory_group(request,group,start,end):

@@ -3,8 +3,9 @@ from django.http import JsonResponse,HttpResponse
 from django.apps import apps
 from datetime import date,timedelta,datetime
 from dateutil.relativedelta import relativedelta
-from archive.models import namadtomodel
+from archive.models import namadtomodel,Archive
 from scipy import stats
+
 
 has = ['agriculture','coal','oil_gas','metal_ores','other_mines','textiles','wood','paper','printz','pet_products','plastic','elec_computer','basic_metal','metal_products','equipment','electrical','comm_devices','cars','sugar','multidisciplinary','supply_elec_gas','food','drug','chemical','contracting','wholesale','retail','tile','cement','non_metal','hotel','investments','banks','other_financial','transportation','water_transportation','financial','insurance','auxiliary','etf','financing_bonds','estate','engineering','app_computer','information','technical_services','artistic','telecommunication','tanning']    
    
@@ -366,3 +367,20 @@ def pluginc(request):
                         all_data.append({"n":da.name,"g":item,"g_fa":item_p[0].namad,"d":calculate_d,'d_r':0,"w":week_calculate[da.name],'w_r':0,"m":month_calculate[da.name],"m_r":0,"cal":0,"r":0})
   
     return JsonResponse(all_data,safe=False)
+
+
+def add_namad(request):
+    all_data = []
+
+    archive =  Archive.objects.all()
+
+    for data in archive:
+        url = data.url
+        url = url.split("=")
+        url = url[2]
+        api = data.api
+        api = api.split("=")
+        api = api[2]
+        api = api.replace("+","")
+        all_data.append({url,api})
+    return HttpResponse(all_data)
