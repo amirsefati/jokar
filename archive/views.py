@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse,JsonResponse
 import requests
 import re
 import datetime,time
@@ -32,6 +32,59 @@ from archive.models import information,technical_services,artistic,tanning
 from archive.models import telecommunication
 
 has = ['agriculture','coal','oil_gas','metal_ores','other_mines','textiles','wood','paper','printz','pet_products','plastic','elec_computer','basic_metal','metal_products','equipment','electrical','comm_devices','cars','sugar','multidisciplinary','supply_elec_gas','food','drug','chemical','contracting','wholesale','retail','tile','cement','non_metal','hotel','investments','banks','other_financial','transportation','water_transportation','financial','insurance','auxiliary','etf','financing_bonds','estate','engineering','app_computer','information','technical_services','artistic','telecommunication','tanning']    
+
+def history_new_method(request):
+    list_namad = Archive.objects.filter(name="ذوب")
+    for namad in list_namad:
+        url = namad.url
+        InsCode = url.split("=")
+        InsCode = InsCode[2]
+        url = 'http://www.tsetmc.ir/tsev2/data/clienttype.aspx?i={}'.format(InsCode)
+        res = requests.get(url)
+        res = res.text
+        res = res.split(";")
+        data_namad = []
+        all_data = []
+        for haghi_hoghoghi in res:
+            if(len(haghi_hoghoghi) > 20):
+                haghi_hoghoghi = haghi_hoghoghi.split(",")
+                date = haghi_hoghoghi[0]
+                cbs = haghi_hoghoghi[1]
+                cbc = haghi_hoghoghi[2]
+                css = haghi_hoghoghi[3]
+                csc = haghi_hoghoghi[4]
+                vbs = haghi_hoghoghi[5]
+                vbc = haghi_hoghoghi[6]
+                vss = haghi_hoghoghi[7]
+                vsc = haghi_hoghoghi[8]
+                data_namad.append({'namad':namad.name,'group':namad.group,'date':date,'cbs':cbs,'cbc':cbc,'css':css,'csc':csc,
+                'vbs':vbs,'vbc':vbc,'vss':vss,'vsc':vsc})
+
+        url2 = 'http://members.tsetmc.com/tsev2/data/InstTradeHistory.aspx?i={}&Top=999999&A=0'.format(InsCode)
+        res2 = requests.get(url2)
+        res2 = res2.text
+        res2 = res2.split(";")
+        for price in res2:
+            if(len(price) > 60):
+                price = price.split("@")
+                date_n = price[0]
+                name = namad.name
+                pe = price[3]
+                pi = price[4]
+                value_t = price[7]
+                vt = price[8]
+                ct = price[9]
+                for find_data in data_namad:
+                    if(find_data["namad"] == name):
+                        if(find_data["date"] == date_n):
+                            find_data["pe"] = pe
+                            find_data["pi"] = pi
+                            find_data["value_t"] = value_t
+                            find_data["vt"] = vt
+                            find_data["ct"] = ct
+
+                            
+        return JsonResponse(data_namad,safe=False)
 
 def edit_namad_new(request,date_start):
     all_data = []

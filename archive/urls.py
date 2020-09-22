@@ -23,6 +23,8 @@ urlpatterns = [
     
     path('edit_namad_new/<date_start>',views.edit_namad_new),
 
+    path('history_new_method',views.history_new_method),
+
     #views
     path('get_history_namad',views.get_history_namad),
     path('get_history_group',views.get_history_group),
