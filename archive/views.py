@@ -57,8 +57,11 @@ def history_new_method(request):
                 vbc = haghi_hoghoghi[6]
                 vss = haghi_hoghoghi[7]
                 vsc = haghi_hoghoghi[8]
-                data_namad.append({'namad':namad.name,'group':namad.group,'date':date,'cbs':cbs,'cbc':cbc,'css':css,'csc':csc,
-                'vbs':vbs,'vbc':vbc,'vss':vss,'vsc':vsc})
+                if(date == "20200324"):
+                    break
+                else:    
+                    data_namad.append({'namad':namad.name,'group':namad.group,'date':date,'cbs':cbs,'cbc':cbc,'css':css,'csc':csc,
+                    'vbs':vbs,'vbc':vbc,'vss':vss,'vsc':vsc})
 
         url2 = 'http://members.tsetmc.com/tsev2/data/InstTradeHistory.aspx?i={}&Top=999999&A=0'.format(InsCode)
         res2 = requests.get(url2)
@@ -74,16 +77,27 @@ def history_new_method(request):
                 value_t = price[7]
                 vt = price[8]
                 ct = price[9]
-                for find_data in data_namad:
-                    if(find_data["namad"] == name):
-                        if(find_data["date"] == date_n):
-                            find_data["pe"] = pe
-                            find_data["pi"] = pi
-                            find_data["value_t"] = value_t
-                            find_data["vt"] = vt
-                            find_data["ct"] = ct
-
-                            
+                if(date == "20200324"):
+                    break
+                else:
+                    for find_data in data_namad:
+                        if(find_data["namad"] == name):
+                            if(find_data["date"] == date_n):
+                                find_data["pe"] = pe
+                                find_data["pi"] = pi
+                                find_data["value_t"] = value_t
+                                find_data["vt"] = vt
+                                find_data["ct"] = ct
+        
+        for check_in_db in data_namad:
+            group = namadtomodel.objects.filter(namad=check_in_db["group"])
+            en_group = group[0].model
+            create_time = "{}-{}-{}".format(check_in_db["date"][0:4],check_in_db["date"][4:6],check_in_db["date"][6:8])
+            err_list = apps.get_model('archive',en_group).objects.filter(name=check_in_db['namad'],date=create_time)
+            if(len(err_list[0].data) > 14):
+                True
+            else:
+                apps.get_model('archive',en_group).objects.create(name=check_in_db['namad'],date=create_time)
         return JsonResponse(data_namad,safe=False)
 
 def edit_namad_new(request,date_start):
