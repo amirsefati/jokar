@@ -34,7 +34,7 @@ from archive.models import telecommunication
 has = ['agriculture','coal','oil_gas','metal_ores','other_mines','textiles','wood','paper','printz','pet_products','plastic','elec_computer','basic_metal','metal_products','equipment','electrical','comm_devices','cars','sugar','multidisciplinary','supply_elec_gas','food','drug','chemical','contracting','wholesale','retail','tile','cement','non_metal','hotel','investments','banks','other_financial','transportation','water_transportation','financial','insurance','auxiliary','etf','financing_bonds','estate','engineering','app_computer','information','technical_services','artistic','telecommunication','tanning']    
 
 def history_new_method(request):
-    list_namad = Archive.objects.filter(name="حكشتي")
+    list_namad = Archive.objects.all()
     for namad in list_namad:
         url = namad.url
         InsCode = url.split("=")
@@ -82,7 +82,12 @@ def history_new_method(request):
                     en_group = group[0].model
                     create_time = "{}-{}-{}".format(date_n[0:4],date_n[4:6],date_n[6:8])
                     err_list = apps.get_model('archive',en_group).objects.filter(name=name,date=create_time)
-                    return HttpResponse(err_list)
+                    if(err_list.count() > 0):
+                        True
+                    else:
+                        kind = Archive.objects.filter(name=name)
+                        if((datetime.date(int(date_n[0:4]),int(date_n[4:6]),int(date_n[6:8])) - datetime.date(2020,3,24)).days > 1):
+                            apps.get_model('archive',en_group).objects.filter(name=name,kind=kind[0].kind,date=create_time,data=['Stopped stock'])
                 if(False):
                     break
                 else:
@@ -118,14 +123,13 @@ def history_new_method(request):
                 my_obj['data'].append({'ct' : check_in_db["ct"]}) 
                 my_obj['data'].append({'vt' : check_in_db["vt"]}) 
                 my_obj['data'].append({'value_t' : check_in_db["value_t"]}) 
-                #apps.get_model('archive',en_group).objects.filter(name=check_in_db['namad'],kind=kind[0].kind,date=create_time).delete()
+                apps.get_model('archive',en_group).objects.filter(name=check_in_db['namad'],kind=kind[0].kind,date=create_time).delete()
 
-                #apps.get_model('archive',en_group).objects.create(name=check_in_db['namad'],kind=kind[0].kind,date=create_time,data=my_obj)
+                apps.get_model('archive',en_group).objects.create(name=check_in_db['namad'],kind=kind[0].kind,date=create_time,data=my_obj)
             if(apps.get_model('archive',en_group).objects.filter(name=check_in_db['namad'],date=create_time).exists()):
                 True
             else:
                 return HttpResponse(create_time)
-        return JsonResponse(data_namad,safe=False)
 
 def edit_namad_new(request,date_start):
     all_data = []
