@@ -63,7 +63,7 @@ def history_new_method(request):
                     data_namad.append({'namad':namad.name,'group':namad.group,'date':date,'cbs':cbs,'cbc':cbc,'css':css,'csc':csc,
                     'vbs':vbs,'vbc':vbc,'vss':vss,'vsc':vsc})
 
-        url2 = 'http://members.tsetmc.com/tsev2/data/InstTradeHistory.aspx?i={}&Top=999999&A=0'.format(InsCode)
+        url2 = 'http://members.tsetmc.com/tsev2/data/InstTradeHistory.aspx?i={}&Top=999999&A=1'.format(InsCode)
         res2 = requests.get(url2)
         res2 = res2.text
         res2 = res2.split(";")
@@ -77,6 +77,12 @@ def history_new_method(request):
                 value_t = price[7]
                 vt = price[8]
                 ct = price[9]
+                if(price[1] == '0.00'):
+                    group = namadtomodel.objects.filter(namad=namad.group)
+                    en_group = group[0].model
+                    create_time = "{}-{}-{}".format(date_n[0:4],date_n[4:6],date_n[6:8])
+                    err_list = apps.get_model('archive',en_group).objects.filter(name=name,date=create_time)
+                    return HttpResponse(err_list)
                 if(False):
                     break
                 else:
@@ -112,9 +118,9 @@ def history_new_method(request):
                 my_obj['data'].append({'ct' : check_in_db["ct"]}) 
                 my_obj['data'].append({'vt' : check_in_db["vt"]}) 
                 my_obj['data'].append({'value_t' : check_in_db["value_t"]}) 
-                apps.get_model('archive',en_group).objects.filter(name=check_in_db['namad'],kind=kind[0].kind,date=create_time).delete()
+                #apps.get_model('archive',en_group).objects.filter(name=check_in_db['namad'],kind=kind[0].kind,date=create_time).delete()
 
-                apps.get_model('archive',en_group).objects.create(name=check_in_db['namad'],kind=kind[0].kind,date=create_time,data=my_obj)
+                #apps.get_model('archive',en_group).objects.create(name=check_in_db['namad'],kind=kind[0].kind,date=create_time,data=my_obj)
             if(apps.get_model('archive',en_group).objects.filter(name=check_in_db['namad'],date=create_time).exists()):
                 True
             else:
