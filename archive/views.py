@@ -34,7 +34,7 @@ from archive.models import telecommunication
 has = ['agriculture','coal','oil_gas','metal_ores','other_mines','textiles','wood','paper','printz','pet_products','plastic','elec_computer','basic_metal','metal_products','equipment','electrical','comm_devices','cars','sugar','multidisciplinary','supply_elec_gas','food','drug','chemical','contracting','wholesale','retail','tile','cement','non_metal','hotel','investments','banks','other_financial','transportation','water_transportation','financial','insurance','auxiliary','etf','financing_bonds','estate','engineering','app_computer','information','technical_services','artistic','telecommunication','tanning']    
 
 def history_new_method(request):
-    list_namad = Archive.objects.filter(name="ذوب")
+    list_namad = Archive.objects.filter(name="حكشتي")
     for namad in list_namad:
         url = namad.url
         InsCode = url.split("=")
@@ -68,7 +68,7 @@ def history_new_method(request):
         res2 = res2.text
         res2 = res2.split(";")
         for price in res2:
-            if(len(price) > 60):
+            if(len(price) > 10):
                 price = price.split("@")
                 date_n = price[0]
                 name = namad.name
@@ -77,7 +77,7 @@ def history_new_method(request):
                 value_t = price[7]
                 vt = price[8]
                 ct = price[9]
-                if(date == "20200324"):
+                if(False):
                     break
                 else:
                     for find_data in data_namad:
@@ -97,7 +97,28 @@ def history_new_method(request):
             if(len(err_list[0].data) > 14):
                 True
             else:
-                apps.get_model('archive',en_group).objects.create(name=check_in_db['namad'],date=create_time)
+                kind = Archive.objects.filter(name=check_in_db['namad'])
+                my_obj = {'data':[]}
+                my_obj['data'].append({'vbs' : check_in_db["vbs"]}) 
+                my_obj['data'].append({'vbc' : check_in_db["vbc"]}) 
+                my_obj['data'].append({'vss' : check_in_db["vss"]}) 
+                my_obj['data'].append({'vsc' : check_in_db["vsc"]}) 
+                my_obj['data'].append({'cbs' : check_in_db["cbs"]}) 
+                my_obj['data'].append({'cbc' : check_in_db["cbc"]}) 
+                my_obj['data'].append({'css' : check_in_db["css"]}) 
+                my_obj['data'].append({'csc' : check_in_db["csc"]}) 
+                my_obj['data'].append({'pi' : check_in_db["pi"]}) 
+                my_obj['data'].append({'pe' : check_in_db["pe"]}) 
+                my_obj['data'].append({'ct' : check_in_db["ct"]}) 
+                my_obj['data'].append({'vt' : check_in_db["vt"]}) 
+                my_obj['data'].append({'value_t' : check_in_db["value_t"]}) 
+                apps.get_model('archive',en_group).objects.filter(name=check_in_db['namad'],kind=kind[0].kind,date=create_time).delete()
+
+                apps.get_model('archive',en_group).objects.create(name=check_in_db['namad'],kind=kind[0].kind,date=create_time,data=my_obj)
+            if(apps.get_model('archive',en_group).objects.filter(name=check_in_db['namad'],date=create_time).exists()):
+                True
+            else:
+                return HttpResponse(create_time)
         return JsonResponse(data_namad,safe=False)
 
 def edit_namad_new(request,date_start):
